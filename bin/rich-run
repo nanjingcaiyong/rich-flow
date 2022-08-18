@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const shell = require('shelljs')
+
+
+program
+  .usage('<command-name>')
+
+ program.on('--help', () => {
+  console.log('  Examples:')
+  console.log()
+  console.log(chalk.gray('    # install rich\'s plugin'))
+  console.log('    $ rich install eslint')
+  console.log()
+})
+
+function help () {
+ program.parse(process.argv)
+ if (program.args.length < 1) return program.help()
+}
+help()
+
+const commandName = program.args[0].split(':')[0]
+const envName = program.args[0].split(':')[1]
+shell.exec(`node build/${envName}.server.js ${envName}`)

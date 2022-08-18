@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const shell = require('shelljs');
+const chalk = require('chalk');
+
+program
+  .usage('<branch-name> [branch-name]')
+
+ program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # create git\'s new branch'))
+  console.log('    $ rich branch feature-f1')
+  console.log()
+})
+
+function help () {
+ program.parse(process.argv)
+ if (program.args.length < 1) return program.help()
+}
+help()
+
+let branchName = program.args[0]; // 模版名称
+
+process.on('exit', () => {
+  console.log()
+})
+
+function run () {
+  shell.exec(`git switch ${branchName}`)
+}
+run()

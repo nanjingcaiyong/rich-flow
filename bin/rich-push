@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const shell = require('shelljs');
+const chalk = require('chalk');
+const gitBranchIs = require('git-branch-is');
+const { isRemoteBranch, command } = require('../lib/utils.js')
+
+program
+  .usage('<remote-name> [remote-name]')
+
+program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # git push to remote'))
+  console.log('    $ rich push')
+  console.log()
+})
+
+function help () {
+  program.parse(process.argv)
+ }
+ help()
+
+const remoteName = program.args[0]
+
+process.on('exit', () => {
+  console.log()
+})
+
+
+function run() {
+  gitBranchIs(async function(curBranchName) {
+    const isRemote = await isRemoteBranch(curBranchName) 
+    if (!isRemote && remoteName) {
+      shell.exec(`git push ${remoteName} -u ${curBranchName}`)
+    } else {
+      shell.exec('git push')
+    }
+  })
+}
+
+// command().then(res => {
+//   console.log(res.split('\n'))
+// })
+run()

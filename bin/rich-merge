@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const shell = require('shelljs');
+const chalk = require('chalk');
+const { isLocalChanged, isRemoteBranch, command } = require('../lib/utils')
+const gitBranchIs = require('git-branch-is');
+
+program
+  .usage('<branch-name>')
+
+ program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # merge git\'s branch'))
+  console.log('    $ rich merge feature-t1')
+  console.log()
+})
+
+function help () {
+ program.parse(process.argv)
+ if (program.args.length < 1) return program.help()
+}
+help()
+
+let branchName = program.args[0];
+
+process.on('exit', () => {
+  console.log()
+})
+
+async function run () {
+  const hasChange = await isLocalChanged()
+  if (hasChange) {
+    console.log('there are uncommitted codes')
+    return;
+  }
+  try {
+    command(`git merge ${branchName} --squash`)
+  } catch (err) {
+    return
+  }
+  const isRemote = await isRemoteBranch(branchName)
+  gitBranchIs('master').then((isMasterBranch) => {
+   // 如果合并的是master 并且 是远程分支，才会删除
+   if (isMasterBranch && isRemote) {
+    shell.exec(`git push origin -d ${branchName}`)
+   }
+ })
+}
+
+run()

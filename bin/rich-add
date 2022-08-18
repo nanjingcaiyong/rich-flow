@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const shell = require('shelljs');
+const chalk = require('chalk');
+
+program
+  .usage('<files>')
+
+ program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # add file contents to the index'))
+  console.log('    $ rich add .')
+  console.log('    $ rich add file1.js file2.js')
+  console.log()
+})
+
+function help () {
+ program.parse(process.argv)
+ if (program.args.length < 1) return program.help()
+}
+help()
+
+let files = program.args; // 模版名称
+
+
+process.on('exit', () => {
+  console.log()
+})
+
+
+function run () {
+  shell.exec(`git add ${files.join(' ')}`)
+}
+run()

@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const { readFile, command, oraPromise } = require('../lib/utils.js');
+const crypto = require('crypto');
+const axios = require('axios').default;
+const chalk = require('chalk');
+const WEBHOOK = '';
+const SIGN = '';
+
+ program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # add file contents to the index'))
+  console.log('    $ rich add .')
+  console.log('    $ rich add file1.js file2.js')
+  console.log()
+})
+
+function generateSign (secret) {
+  const timestamp = new Date().getTime();
+  const stringToSign = timestamp + '\n' + secret;
+  const sign = crypto.createHmac('sha256', secret).update(stringToSign).digest('base64');
+  return {
+    timestamp,
+    sign: encodeURIComponent(sign),
+  };
+}
+
+function handleSendGroupMessage(url, message) {
+  return axios.post(url, message, { headers: { 'content-Type': 'application/json;charset=utf-8'}})
+    .then(res => res.data)
+}
+
+async function main () {
+  oraPromise(() => {
+    return new Promise((resolve, reject) => {
+      command('npm publish')
+        .then(async () => {
+          const packageJson = await readFile(process.cwd() + '/package.json')
+          const { name, version } = JSON.parse(packageJson)
+          const { timestamp, sign } = generateSign(SIGN);
+          const url = WEBHOOK + `&timestamp=${timestamp}&sign=${sign}`;
+          const res = await handleSendGroupMessage(url, {msgtype: 'text', text: {"content": `包"${name}", 已更新版本至"${version}", 请及时按需更新!"`}})
+          return res.errcode === 0 && res.errmsg === 'ok' ? resolve() : reject('钉钉推送失败')
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    })
+  }, {text: '正在发版'})
+}
+main()
+
+
+
+
+

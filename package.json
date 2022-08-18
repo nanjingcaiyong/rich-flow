@@ -1,0 +1,80 @@
+{
+  "name": "rich-flow",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "rich": "bin/rich",
+    "rich-init": "bin/rich-init",
+    "rich-list": "bin/rich-list",
+    "rich-install": "bin/rich-install",
+    "rich-lint": "bin/rich-lint",
+    "rich-branch": "bin/rich-branch",
+    "rich-merge": "bin/rich-merge",
+    "rich-push": "bin/rich-push",
+    "rich-pull": "bin/rich-pull",
+    "rich-fetch": "bin/rich-fetch",
+    "rich-reset": "bin/rich-reset",
+    "rich-run": "bin/rich-run",
+    "rich-switch": "bin/rich-switch",
+    "rich-add": "bin/rich-add",
+    "rich-publish": "bin/rich-publish",
+    "rich-commit": "bin/rich-commit"
+  },
+  "config": {
+    "port": "8080"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs",
+    "prepare": "husky install",
+    "lint": "eslint --ext .js,.ts lib",
+    "lint:fix": "eslint --fix --ext .js,.ts lib",
+    "release": "standard-version --infile docs/CHANGELOG.md"
+  },
+  "keywords": [],
+  "author": {
+    "name": "yong.cai",
+    "email": "yong.cai@kapeixi.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@alicloud/pop-core": "^1.7.10",
+    "async": "^3.2.3",
+    "axios": "^0.27.2",
+    "chalk": "^4.0.0",
+    "commander": "^9.0.0",
+    "consolidate": "^0.16.0",
+    "download-git-repo": "^3.0.2",
+    "git-branch-is": "^4.0.0",
+    "handlebars": "^4.7.7",
+    "inquirer": "^8.2.0",
+    "js-beautify": "^1.14.2",
+    "metalsmith": "^2.4.2",
+    "minimist": "^1.2.5",
+    "multimatch": "^2.1.0",
+    "read-metadata": "^1.0.0",
+    "request": "^2.88.2",
+    "semver": "^7.3.5",
+    "shelljs": "^0.8.5",
+    "tildify": "^2.0.0",
+    "user-home": "^3.0.0",
+    "validate-npm-package-name": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.0.2",
+    "@commitlint/config-conventional": "^17.0.2",
+    "commitizen": "^4.2.4",
+    "commitlint": "^17.0.2",
+    "crypto": "^1.0.1",
+    "eslint": "^8.18.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.2",
+    "standard-version": "^9.5.0",
+    "vitepress": "^1.0.0-alpha.2"
+  }
+}

@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const shell = require('shelljs');
+const chalk = require('chalk');
+const { prefixReg } = require('../lib/regex')
+const gitBranchIs = require('git-branch-is');
+
+
+program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # git push to remote'))
+  console.log('    $ rich push')
+  console.log()
+})
+
+
+process.on('exit', () => {
+  console.log()
+})
+function run() {
+  shell.exec(`git pull`)
+}
+run()

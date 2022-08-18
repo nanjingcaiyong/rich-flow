@@ -1,0 +1,355 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const chalk = require('chalk');
+const inquirer = require('inquirer');
+const gitBranchIs = require('git-branch-is');
+const { command, isLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm } = require('../lib/utils.js');
+const SETTINGS_CONFIG = require('../.vscode/settings.json')
+
+
+program
+  .usage('<plugin-name>')
+
+program.on('--help', () => {
+  console.log('  Examples:')
+  console.log()
+  console.log(chalk.gray('    # install rich\'s plugin'))
+  console.log('    $ rich install eslint')
+  console.log()
+})
+
+function help() {
+  program.parse(process.argv)
+  if (program.args.length < 1) return program.help()
+}
+help()
+
+const INSTALL_PLUGIN_NAME = program.args[0]; // 安装的插件名称，例如: eslint
+
+process.on('exit', () => {
+  console.log()
+})
+
+class Package {
+  constructor () {
+    this.packageJson = {};
+    this.dependencies = {};
+    this.devDependencies = {};
+  }
+
+  async readPackageJson () {
+    const jsonStr = await readFile('package.json')
+    this.packageJson = JSON.parse(jsonStr) || {}
+    this.dependencies = this.packageJson['dependencies'] || {}
+    this.devDependencies = this.packageJson['devDependencies'] || {}
+  }
+
+  updatePackageJson () {
+    return this.readPackageJson()
+  }
+
+  writePackageJson (newPackageJson) {
+    this.packageJson = newPackageJson
+    return writeFile('package.json', jsonFormat(newPackageJson))
+  }
+
+  /**
+   * @description 通过依赖名称获取版本
+   */
+  getDependencyVersion  (dependencyName) {
+    const { dependencies = {} } = this
+    return dependencies?.[dependencyName]
+  }
+
+ /**
+  * @description 获取 vue 版本
+  * @returns 
+  */
+  getVueVersion () {
+    const version = this.getDependencyVersion('vue');
+    return version ? version.match(/\d/)[0] : null
+  }
+
+  /**
+   * @description 获取所有依赖
+   * @returns 
+  */
+  getAllDependencies () {
+    const { devDependencies, dependencies } = this
+    return Object.assign({}, devDependencies, dependencies)
+  }
+
+
+  async removeConfig () {
+    await this.readPackageJson()
+    const { packageJson } = this
+    if (packageJson['eslintConfig'] || packageJson['prettier']) {
+      // 删除package.json中的eslintConfig
+      packageJson['eslintConfig'] && delete packageJson['eslintConfig']
+      // 删除package.json中的prettier
+      packageJson['prettier'] && delete packageJson['prettier']
+      return this.writePackageJson(packageJson)
+    }
+    return Promise.resolve()
+  }
+
+  /**
+   * @description 根据plugins去package.json判断依赖是否安装过
+   * @param { Array | string } plugins 依赖名字或多个依赖
+   * @returns {"eslint": true| false}
+   */
+  isInstalled (plugins) {
+    const pluginNameReg = new RegExp(`"${INSTALL_PLUGIN_NAME}"`)
+    return Array.isArray(plugins)
+      ? plugins.reduce((obj, plugin) => {
+        return Object.assign(obj, {
+          [plugin]: pluginNameReg.test(this.packageJson)
+        })
+      }, {})
+      : { [plugins]: pluginNameReg.test(this.packageJson)}
+  }
+}
+
+
+class FileOperator {
+  constructor () {
+    this.deleteFiles = ['.eslintrc.json', '.eslintrc.yaml', '.eslintrc.js', '.prettierrc.js','.prettierignore']
+  }
+  /**
+ * @description 是否初始化了 git
+ * @returns Promise<Boolean>
+ */
+  isInitGit () {
+    return stat('.git')
+  }
+  /**
+ * @description 是否初始化了 npm
+ * @returns Promise<Boolean>
+ */
+  isInitNpm () {
+    return stat('package.json')
+  }
+  /**
+   * @description 是否有.gitignore文件
+   * @returns 
+   */
+  hasGitignore () {
+    return stat('.gitignore')
+  }
+  /**
+   * @description 创建.gitignore 文件
+   * @param ignoreRegs 
+   */
+  createGitIgnore = (ignoreRegs) => {
+    touch('.gitignore', stringFormat(ignoreRegs))
+  }
+
+  /**
+   * @description 获取 eslint 配置模板对象
+   * @returns 
+  */
+  getESLintConfig (vueVersion) {
+    const base = {
+      extends: [
+        "eslint:recommended",
+      ],
+      rules: {}
+    }
+    if (vueVersion) {
+      base.extends.push(Number(vueVersion) === 2 ? 'plugin:vue/recommended' : "plugin:vue/vue3-recommended")
+    }
+    base.extends.push("eslint-config-rich")
+    return base;
+  }
+
+
+  /**
+   * @description 写入vscode 配置
+  */
+  writeVsCodeConfig () {
+    return oraPromise(() => {
+      if (!exists('.vscode')) mkdir('.vscode');
+      return writeFile('.vscode/settings.json', stringFormat(SETTINGS_CONFIG))
+    }, {text: '配置vscode'})
+  }
+
+  /**
+   * @description 写入配置到配置文件
+   * @param { object } newObj 写入文件的对象
+   * @param { string } path 配置文件路径
+   */
+  writeConfigToFile  (newObj, path) {
+    const content = jsonFormat(newObj)
+    writeFile(path, content)
+  }
+
+  /**
+   * @description 删除ESLint其余的配置文件和prettier配置
+   * 例如：
+   * package.json中的eslintConfig字段
+   * .eslintrc.json
+   * .eslintrc
+   * .eslintrc.yaml
+   */
+  writeESLintConfig (vueVersion) {
+    const { deleteFiles } = this
+    oraPromise(() => {
+      // 并发删除配置文件
+      let promises = deleteFiles.reduce((promises, filePath) => promises.concat(rm(filePath)), [])
+      const eslintConfig = this.getESLintConfig(vueVersion)
+      // 写入eslint配置
+      promises.push(this.writeConfigToFile(eslintConfig, resolve('.eslintrc')))
+      return Promise.all(promises).catch(()=>{})
+    }, { text: '配置ESLint' })
+  }
+}
+
+class CommandOperator {
+  constructor () {
+    this.packageCommand = {};
+    this.packageConfig = {
+      'npm': {
+        command: 'npm',
+        install: "npm install",
+        uninstall: 'npm uninstall',
+        suffix: '-D'
+      },
+      'yarn': {
+        command: 'yarn',
+        install: "yarn add",
+        uninstall: 'yarn remove',
+        suffix: '--dev'
+      }
+    }
+  }
+
+  async init () {
+    let answer = await inquirer.prompt([{
+      name: 'packtool',
+      type: 'list',
+      message: '请选择包管理器',
+      choices: ['npm', 'yarn', 'pnpm'],
+      default: 0
+    }])
+    this.packageCommand = this.packageConfig[answer.packtool]
+  }
+  /**
+   * @description 安装依赖
+   * @param { string } packtool 包管理工具
+   * @param { Array } plugins 需要安装的依赖
+   */
+  installPlugins (plugins) {
+    const { packageCommand } = this
+    return plugins.length
+      ? command(`${packageCommand.install} ${plugins.join(' ')} ${packageCommand.suffix}`)
+      : Promise.resolve()
+  }
+
+  /**
+   * @description 卸载依赖
+   * @param plugins 
+   */
+  uninstallPlugins (plugins) {
+    return plugins.length 
+      ? command(`${this.packageCommand.uninstall} ${plugins.join(' ')}`) 
+      : Promise.resolve()
+  }
+
+  /**
+   * @description 使用eslint格式化代码
+   */
+  formatCodeByEslint () {
+    return oraPromise(() => command('npx eslint --fix --ext .js,.vue,.ts .'), {text: '格式化代码'})
+      .catch(() => {
+        console.log(chalk.red('ESLint语法错误无法自动修复，请手动修复或在.eslintrc.js中忽略规则'))
+        console.log(chalk.green('修复后请继续执行 `rich lint` 进行校验'))
+        process.exit()
+      })
+  }
+
+  async commit (msg) {
+    // 做一次 git 提交
+    await command('git add .')
+    await command(`git commit -m "${msg}"`)
+  }
+}
+
+
+const main = async () => {
+  const packageIns = new Package()
+  const fileIns = new FileOperator()
+
+  await packageIns.readPackageJson()
+  const commandIns = new CommandOperator(fileIns.packageJson)
+  await commandIns.init()
+  const installPlugins = ['eslint-config-rich', 'eslint', 'eslint-plugin-vue']
+  const prettierPlugins = Object.keys(packageIns.devDependencies).filter(t => /prettier|eslint/.test(t))
+  const vueVersion = packageIns.getVueVersion()
+
+  // 1、检查是否初始化过npm
+  // 2、是否有.gitignore文件
+  await Promise.all([
+    fileIns.isInitNpm(),
+    fileIns.hasGitignore()
+  ])
+  .then(([r1, r2]) => {
+    r1 || command(`npm init -y`)
+    r2 || fileIns.createGitIgnore(['node_modules', '.DS_Store', 'dist'])
+  })
+
+
+  // 1、是否初始化过git
+  // 2、是否有本地修改
+  await Promise.all([fileIns.isInitGit(), isLocalChanged()])
+    .then(async ([r1, r2]) => {
+      if (!r1) {
+        command('git init')
+        command('git add .')
+        command('git commit -m "feat: first commit"')
+      }
+      if (r2) {
+        console.log(chalk.red('本地有修改但未提交的文件, 已为你进行本地暂存'))
+        await oraPromise(() => command('git stash push'), {text: '暂存代码'}) 
+      }
+    })
+
+  // 切换到master分支
+  if (!await gitBranchIs('master')) {
+    await oraPromise(() => command('git checkout master'), {text: '切换master'})
+  }
+
+  // 如果是远程仓库，拉取更新
+  if (await isRemoteRegistry()) {
+    await oraPromise(() => command('git pull'), {text: '拉取更新'})
+  }
+
+  await oraPromise(async () => {
+    await commandIns.uninstallPlugins(prettierPlugins)
+    await commandIns.installPlugins(installPlugins)
+    await packageIns.removeConfig()
+  }, {text: '配置依赖'})
+  
+
+  await Promise.all([
+    fileIns.writeESLintConfig(vueVersion),
+    fileIns.writeVsCodeConfig()
+  ])
+
+  // 格式化代码
+  await commandIns.formatCodeByEslint()
+  
+  await commandIns.commit('ci: install eslint and format')
+  console.log(chalk.green('🎉安装成功, 请到master分支查看最新一次的修改'))
+}
+
+main()
+
+
+
+
+
+
+
+
+

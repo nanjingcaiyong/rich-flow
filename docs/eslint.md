@@ -1,0 +1,19 @@
+# 规范检查
+
+## 安装
+
+```sh
+rich install eslint
+```
+
+## 使用
+
+检查代码风格问题
+```sh
+rich lint
+```
+
+自动格式化代码
+```sh
+rich lint --fix
+```

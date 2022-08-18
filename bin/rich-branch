@@ -1,0 +1,77 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const shell = require('shelljs');
+const chalk = require('chalk');
+const { prefixReg } = require('../lib/regex')
+const inquirer = require('inquirer');
+const ENV_BRANCHES = ['master', 'pre', 'test', 'dev']; // 环境分支
+const FIX_PREFIX = 'fix-';
+const FEATURE_PREFIX = 'feature-';
+
+program
+  .usage('<branch-name> [branch-name]')
+  .option('-d, --delete',  'delete branch')
+  .option('-b, --branch',  'create branch and switch')
+
+ program.on('--help', () => {
+  console.log()
+  console.log(chalk.gray('    # create git\'s new branch'))
+  console.log('    $ rich branch feature-f1')
+  console.log(chalk.gray('    # delete git\'s new branch'))
+  console.log('    $ rich branch -d feature-f1')
+  console.log()
+})
+
+function help () {
+ program.parse(process.argv)
+ if (program.args.length < 1) return program.help()
+}
+help()
+
+const options = program.opts(); // 可选参数
+
+let branchName = program.args[0]; // 模版名称
+
+process.on('exit', () => {
+  console.log()
+})
+
+/**
+ * @description 创建新分支
+ * @param { branchName: string } 分支名称
+ */
+async function createBranch (branchName) {
+  let newBranchName = branchName
+  if (!(ENV_BRANCHES.includes(branchName) || prefixReg(FIX_PREFIX).test(branchName) || prefixReg(FEATURE_PREFIX).test(branchName))) {
+    const answer = await inquirer.prompt([{
+      type: 'confirm',
+      message: `Do you want to create a branch called feature-${branchName}? (y/n)`,
+      name: 'overwrite'
+    }])
+    newBranchName = (answer.overwrite ? 'feature-' : 'fix-') + newBranchName
+    console.log(chalk.yellow(`WARN: The branch naming format is wrong. The prefix "feature -" or "fix -" is missing. It has been renamed to "${newBranchName}" for you`))
+  }
+  if (options.branch) {
+    shell.exec(`git checkout -b ${newBranchName}`)
+  } else {
+    shell.exec(`git branch ${newBranchName}`)
+  }
+}
+
+/**
+ * @description 删除分支
+ * @param { branchName: string } 分支名称
+ */
+function deleteBranch (branchName) {
+  shell.exec(`git branch -D ${branchName}`)
+}
+
+async function run () {
+  if (options.delete) {
+    deleteBranch(branchName)
+  } else {
+    await createBranch(branchName)
+  }
+}
+
+run()

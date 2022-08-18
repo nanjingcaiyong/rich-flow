@@ -1,0 +1,29 @@
+{
+  "javascript.validate.enable": true,
+  "css.validate": true,
+  "less.validate": true,
+  "html.validate.scripts": true,
+  "stylelint.validate": [
+    "css",
+    "less",
+    "vue"
+  ],
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "files.eol": "\n",
+  "[css]": {
+    "editor.defaultFormatter": "stylelint.vscode-stylelint"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.tslint": true,
+    "source.fixAll.stylelint": true
+  },
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "eslint.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "vue"
+  ]
+}

@@ -1,0 +1,101 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const beautify = require('js-beautify').js
+
+const fs = require('fs')
+
+
+/**
+ * @description 相对路径转项目的绝对路径
+ * @param { string } path 相对路径
+ * @returns 
+ */
+ const resolve = (path) => {
+  return process.cwd() + '/' + path
+}
+
+/**
+ * @description 读取文件内容
+ * @param { string } rootPath 相对于项目根目录的相对路径
+ * @returns 
+ */
+ const readFileContent = (rootPath) => {
+  return fs.readFileSync(resolve(rootPath), {
+   encoding: 'utf8',
+  })
+}
+
+/**
+ * @description 读取package.json内容
+ * @returns 
+ */
+ const readPackageJson = () => {
+  return readFileContent('/package.json')
+ }
+
+ /**
+  * @description 判断是否是vue-cli 创建的项目
+  * @returns { boolean }
+  */
+ const isCliProject = () => {
+  const packageJson = JSON.parse(readPackageJson())
+  return !!(packageJson.devDependencies['@vue/cli-service'] || packageJson.dependencies['@vue/cli-service'])
+ }
+
+program
+  .usage('<branch-name>')
+
+const envFileNames = fs.readdirSync('.').filter(filename => /\.env\..*/.exec(filename))
+
+
+/**
+ * @description 确保根目录下有config文件夹
+ */
+const confirmDir = (dir) => {
+  // 判断项目根目录下是否有config文件夹
+  if (!fs.existsSync(dir)) {
+    fs.mkdir(`./${dir}`, {}, () => {})
+  }
+}
+
+
+const formatJSCode = (code) => {
+  return beautify(code, { indent_size: 2, space_in_empty_paren: true })
+}
+
+/**
+ * 1、.env(vue-cli)
+ * 2、单个文件
+ * 3、文件夹
+ */
+const run = () => {
+  confirmDir('config')
+  confirmDir('build')
+  envFileNames.forEach(filename => {
+    const envName = /\.env\.(.*)/.exec(filename)[1]
+    const module = fs
+      .readFileSync(filename, {encoding: 'utf8'})
+      .replace(/\=/g, ':')
+      .replace(/[\r\n]/g, ',\r\n')
+
+    fs.writeFileSync(
+      `./config/${envName}.config.js`, 
+      formatJSCode(`module.exports = {\r\n${module}\r\n}`),
+      { encoding: 'utf8'}
+    )
+    fs.writeFileSync(
+      './config/index.js',
+      formatJSCode('const envObj = require(`./${process.env.NODE_ENV}.config.js`)\r\nmodule.exports = envObj')
+    )
+
+    fs.writeFileSync(
+      `./build/${envName}.server.js`, 
+      formatJSCode(`const shell = require('shelljs')\r\nprocess.env.NODE_ENV='${envName}'\r\nshell.exec('npx vue-cli-service serve')`),
+      { encoding: 'utf8'}
+    )
+  })
+}
+
+
+run()

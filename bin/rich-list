@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+const logger = require('../lib/logger')
+const request = require('request')
+const chalk = require('chalk')
+
+const GITHUB = {
+  url: 'https://api.github.com/users/nanjingcaiyong/repos',
+  agent: 'rich-flow',
+  topic: 'templates' // 需要给项目topics添加'templates'
+}
+
+console.log()
+process.on('exit', () => {
+  console.log()
+})
+
+request({
+  url: GITHUB.url,
+  headers: {
+    'User-Agent': GITHUB.agent
+  }
+}, (err, res, body) => {
+  if (err) logger.fatal(err)
+  const requestBody = JSON.parse(body)
+    .filter(t => t.topics.includes(GITHUB.topic))
+  if (Array.isArray(requestBody)) {
+    console.log('  可用的项目模板如下: ')
+    console.log()
+    requestBody.length
+      ? requestBody.forEach(repo => {
+        console.log(
+          '  ' + chalk.yellow('★') +
+          '  ' + chalk.blue(repo.name) +
+          ' - ' + repo.description)
+      })
+      : console.log( '  ' + chalk.red('none'))
+  } else {
+    console.error(requestBody.message)
+  }
+})
