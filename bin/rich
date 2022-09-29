@@ -5,8 +5,9 @@ const { program } = require('commander');
 program
   .version(require('../package').version)
   .usage('<command> [options]')
-  .command('list', 'list available templates')
-  .command('init', 'generate a new project from a template')
+  .command('list', '列出可用的项目模板')
+  .command('init', '通过模板生成一个新项目')
+  .command('new', '创建一个新的迭代')
   .command('reset', 'reset config')
   .command('run', 'test')
   .command('merge', 'merge feature branch')

@@ -6,6 +6,7 @@
   "bin": {
     "rich": "bin/rich",
     "rich-init": "bin/rich-init",
+    "rich-new": "bin/rich-new",
     "rich-list": "bin/rich-list",
     "rich-install": "bin/rich-install",
     "rich-lint": "bin/rich-lint",
@@ -20,9 +21,6 @@
     "rich-add": "bin/rich-add",
     "rich-publish": "bin/rich-publish",
     "rich-commit": "bin/rich-commit"
-  },
-  "config": {
-    "port": "8080"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -47,7 +45,6 @@
     "commander": "^9.0.0",
     "consolidate": "^0.16.0",
     "download-git-repo": "^3.0.2",
-    "git-branch-is": "^4.0.0",
     "handlebars": "^4.7.7",
     "inquirer": "^8.2.0",
     "js-beautify": "^1.14.2",

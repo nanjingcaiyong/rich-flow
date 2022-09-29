@@ -2,9 +2,6 @@
 const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const { prefixReg } = require('../lib/regex')
-const gitBranchIs = require('git-branch-is');
-
 
 program.on('--help', () => {
   console.log()

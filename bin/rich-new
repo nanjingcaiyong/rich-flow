@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+const shell = require('shelljs');
+const { program } = require('commander');
+const { gitBranchIs } = require('../lib/utils.js')
+
+function help () {
+  // 通过program.parse(arguments)方法处理参数，没有被使用的选项会存放在program.args数组中
+  program.parse(process.argv)
+  // if (program.args.length < 1) return program.help()
+}
+help()
+
+let branches = program.args || []
+
+const updateBranch = (branchName) => {
+  shell.exec(`git branch -D ${branchName} && git push origin -d ${branchName}`)
+  shell.exec(`git branch ${branchName} && git push origin -u ${branchName}`)
+}
+
+const updateCode = () => {
+  shell.exec('git pull')
+}
+
+const switchBranch = (branchName) => {
+  shell.exec(`git switch ${branchName}`)
+}
+
+async function run() {
+  const isMasterBranch = await gitBranchIs('master')
+  console.log(isMasterBranch)
+  if (isMasterBranch) {
+    updateCode()
+    branches.forEach(updateBranch)
+  } else {
+    switchBranch('master')
+    run()
+  }
+}
+
+run()

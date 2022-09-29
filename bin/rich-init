@@ -42,10 +42,6 @@ program.on('--help', () => {
   console.log()
 })
 
-/**
- * Help.
- */
-
 function help () {
   program.parse(process.argv)
   if (program.args.length < 1) return program.help()
@@ -57,18 +53,20 @@ help()
  */
 
 let template = program.args[0]
+const options = program.opts()
 const hasSlash = template.indexOf('/') > -1
 const rawName = program.args[1]
 const inPlace = !rawName || rawName === '.'
 const name = inPlace ? path.relative('../', process.cwd()) : rawName
 const to = path.resolve(rawName || '.')
-const clone = program.clone || false
+const clone = options.clone || false
 
 const tmp = path.join(home, '.vue-templates', template.replace(/[\/:]/g, '-'))
-if (program.offline) {
+if (options.offline) {
   console.log(`> Use cached template at ${chalk.yellow(tildify(tmp))}`)
   template = tmp
 }
+
 
 /**
  * Padding.

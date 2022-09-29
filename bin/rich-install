@@ -3,8 +3,7 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
-const gitBranchIs = require('git-branch-is');
-const { command, isLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm } = require('../lib/utils.js');
+const { command, isLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
 const SETTINGS_CONFIG = require('../.vscode/settings.json')
 
 
