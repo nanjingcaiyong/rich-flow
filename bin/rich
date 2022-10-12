@@ -5,26 +5,18 @@ const { program } = require('commander');
 program
   .version(require('../package').version)
   .usage('<command> [options]')
-  .command('list', '列出可用的项目模板')
-  .command('init', '通过模板生成一个新项目')
-  .command('new', '创建一个新的迭代')
-  .command('reset', 'reset config')
-  .command('run', 'test')
-  .command('merge', 'merge feature branch')
-  .command('pull', 'pull the latest code')
-  .command('fetch', 'fetch the latest code')
-  .command('switch', 'switch branch')
-  .command('commit', 'test')
-  .command('add', 'test')
-  .command('create', 'create new branch')
-  .command('push', 'Push code to remote')
-  .command('install', 'install rich\'s plugin')
-  .command('uninstall', 'uninstall rich\'s plugin')
-  .command('lint', 'formatting code')
-  .command('branch', 'create a new branch')
-  .command('dev', 'start a project')
-  .command('publish', 'start a project')
-  .command('build', 'build a project')
-  .command('deploy')
+  .command('list', 'list available project templates')                                       // 列出可用项目模板
+  .command('init', 'generate a new project from a template')                                 // 基于项目模板创建一个新项目
+  .command('new', 'start a new iteration')                                                   // 开启一个新迭代
+  .command('commit', 'submit the modified code')                                             // 提交修改的代码
+  .command('lint:es', 'format code according to eslint')                                     // 根据eslint格式化代码
+  .command('install', 'install rich\'s plugin')                                              // 安装同构化配置
+  .command('branch', 'create a new branch')                                                  // 创建新的特性分支
+  .command('merge', 'join two or more development histories together')                       // 合并特性分支
+  .command('pull', 'fetch from and integrate with another repository or a local branch')     // 更新最新代码
+  .command('fetch', 'download objects and refs from another repository')                     // 拉取最新代码
+  .command('push', 'update remote refs along with associated objects')                       // 推送最新的代码远程
+  .command('switch', 'switch branches')                                                      // 切换分支
+  .command('add', 'ddd file contents to the index')                                          // 添加内容到索引
 
 program.parse(process.argv)
