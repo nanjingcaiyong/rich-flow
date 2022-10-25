@@ -119,29 +119,29 @@ class FileOperator {
  * @description 是否初始化了 git
  * @returns Promise<Boolean>
  */
-  isInitGit () {
+  static isInitGit () {
     return stat('.git')
   }
   /**
  * @description 是否初始化了 npm
  * @returns Promise<Boolean>
  */
-  isInitNpm () {
+  static isInitNpm () {
     return stat('package.json')
   }
   /**
    * @description 是否有.gitignore文件
    * @returns 
    */
-  hasGitignore () {
+   static hasGitignore () {
     return stat('.gitignore')
   }
   /**
    * @description 创建.gitignore 文件
    * @param ignoreRegs 
    */
-  createGitIgnore = (ignoreRegs) => {
-    touch('.gitignore', stringFormat(ignoreRegs))
+   static createGitIgnore = (ignoreRegs) => {
+    return touch('.gitignore', stringFormat(ignoreRegs))
   }
 
   /**
@@ -197,6 +197,7 @@ class FileOperator {
       // 并发删除配置文件
       let promises = deleteFiles.reduce((promises, filePath) => promises.concat(rm(filePath)), [])
       const eslintConfig = this.getESLintConfig(vueVersion)
+      console.log(eslintConfig)
       // 写入eslint配置
       promises.push(this.writeConfigToFile(eslintConfig, resolve('.eslintrc')))
       return Promise.all(promises).catch(()=>{})
@@ -259,7 +260,7 @@ class CommandOperator {
    * @description 使用eslint格式化代码
    */
   formatCodeByEslint () {
-    return oraPromise(() => command('npx eslint --fix --ext .js,.vue,.ts .'), {text: '格式化代码'})
+    return oraPromise(() => command('npx eslint --fix --ext .js,.vue,.ts'), {text: '格式化代码'})
       .catch(() => {
         console.log(chalk.red('ESLint语法错误无法自动修复，请手动修复或在.eslintrc.js中忽略规则'))
         console.log(chalk.green('修复后请继续执行 `rich lint` 进行校验'))
@@ -267,54 +268,54 @@ class CommandOperator {
       })
   }
 
-  async commit (msg) {
-    // 做一次 git 提交
+  static async commit (msg) {
     await command('git add .')
     await command(`git commit -m "${msg}"`)
   }
 }
 
+async function installNPM () {
+  if (!await FileOperator.isInitNpm()) {
+    await command(`npm init -y`);
+    return true
+  }
+  return false
+}
+
+async function installGit () {
+  const [isInitGit, hasGitignore] = await Promise.all([
+    FileOperator.isInitGit(),
+    FileOperator.hasGitignore()
+  ])
+  if (!hasGitignore) {                // 是否存在.gitignore文件
+    await FileOperator.createGitIgnore(['node_modules', '.DS_Store', 'dist'])
+  }
+  if (!isInitGit) {                   // 是否初始化git
+    await command('git init')
+  }
+  return !hasGitignore || !isInitGit
+}
 
 const main = async () => {
-  const packageIns = new Package()
-  const fileIns = new FileOperator()
-
-  await packageIns.readPackageJson()
-  const commandIns = new CommandOperator(fileIns.packageJson)
-  await commandIns.init()
-  const installPlugins = ['eslint-config-rich', 'eslint', 'eslint-plugin-vue']
-  const prettierPlugins = Object.keys(packageIns.devDependencies).filter(t => /prettier|eslint/.test(t))
-  const vueVersion = packageIns.getVueVersion()
-
-  // 1、检查是否初始化过npm
-  // 2、是否有.gitignore文件
   await Promise.all([
-    fileIns.isInitNpm(),
-    fileIns.hasGitignore()
-  ])
-  .then(([r1, r2]) => {
-    r1 || command(`npm init -y`)
-    r2 || fileIns.createGitIgnore(['node_modules', '.DS_Store', 'dist'])
+    installNPM(),
+    installGit()
+  ]).then(([isNotInitNpm, isNotInitGit]) => {
+    if (isNotInitNpm || isNotInitGit) {
+      CommandOperator.commit('first commit')
+    }
   })
 
-
-  // 1、是否初始化过git
-  // 2、是否有本地修改
-  await Promise.all([fileIns.isInitGit(), isLocalChanged()])
-    .then(async ([r1, r2]) => {
-      if (!r1) {
-        command('git init')
-        command('git add .')
-        command('git commit -m "feat: first commit"')
-      }
-      if (r2) {
-        console.log(chalk.red('本地有修改但未提交的文件, 已为你进行本地暂存'))
-        await oraPromise(() => command('git stash push'), {text: '暂存代码'}) 
-      }
-    })
-
-  // 切换到master分支
-  if (!await gitBranchIs('master')) {
+  if (await isLocalChanged()) {
+    console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
+    await oraPromise(async () => {
+      await command('git add .')
+      await command('git stash push')
+    }, {text: '暂存代码'})
+  }
+  
+   // 切换到master分支
+   if (!await gitBranchIs('master')) {
     await oraPromise(() => command('git checkout master'), {text: '切换master'})
   }
 
@@ -323,12 +324,24 @@ const main = async () => {
     await oraPromise(() => command('git pull'), {text: '拉取更新'})
   }
 
+ 
+  const packageIns = new Package()
+  const fileIns = new FileOperator()
+
+  await packageIns.readPackageJson()
+  const commandIns = new CommandOperator(fileIns.packageJson)
+  await commandIns.init()
+  const installPlugins = ['eslint-config-rich', 'eslint', 'eslint-plugin-vue']
+  const prettierPlugins = Object.keys(packageIns.devDependencies).filter(t => /prettier|eslint/.test(t))
+
   await oraPromise(async () => {
     await commandIns.uninstallPlugins(prettierPlugins)
     await commandIns.installPlugins(installPlugins)
     await packageIns.removeConfig()
   }, {text: '配置依赖'})
-  
+
+
+  const vueVersion = packageIns.getVueVersion()
 
   await Promise.all([
     fileIns.writeESLintConfig(vueVersion),
@@ -338,7 +351,7 @@ const main = async () => {
   // 格式化代码
   await commandIns.formatCodeByEslint()
   
-  await commandIns.commit('ci: install eslint and format')
+  await CommandOperator.commit('ci: install eslint and format')
   console.log(chalk.green('🎉安装成功, 请到master分支查看最新一次的修改'))
 }
 
