@@ -5,6 +5,7 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 const { command, isLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
 const SETTINGS_CONFIG = require('../.vscode/settings.json')
+const DELETE_FILES = ['.eslintrc.json', '.eslintrc.yaml', '.eslintrc.js', '.prettierrc.js','.prettierignore']
 
 
 program
@@ -24,7 +25,7 @@ function help() {
 }
 help()
 
-const INSTALL_PLUGIN_NAME = program.args[0]; // 安装的插件名称，例如: eslint
+// const INSTALL_PLUGIN_NAME = program.args[0]; // 安装的插件名称，例如: eslint
 
 process.on('exit', () => {
   console.log()
@@ -32,89 +33,57 @@ process.on('exit', () => {
 
 class Package {
   constructor () {
-    this.packageJson = {};
-    this.dependencies = {};
-    this.devDependencies = {};
+    this.packageJson = {};      // package.json文件转对象
   }
 
+  /**
+   * @description 读取package.json文件
+   */
   async readPackageJson () {
     const jsonStr = await readFile('package.json')
     this.packageJson = JSON.parse(jsonStr) || {}
-    this.dependencies = this.packageJson['dependencies'] || {}
-    this.devDependencies = this.packageJson['devDependencies'] || {}
+    return this.packageJson;
   }
 
-  updatePackageJson () {
-    return this.readPackageJson()
-  }
-
-  writePackageJson (newPackageJson) {
+  /**
+   * @description 更新package.json
+   * @param { newPackageJson: string } 新的 packagejson 对象
+   * @returns 
+   */
+  updatePackageJson (newPackageJson) {
     this.packageJson = newPackageJson
     return writeFile('package.json', jsonFormat(newPackageJson))
   }
 
-  /**
-   * @description 通过依赖名称获取版本
-   */
-  getDependencyVersion  (dependencyName) {
-    const { dependencies = {} } = this
-    return dependencies?.[dependencyName]
-  }
-
  /**
   * @description 获取 vue 版本
-  * @returns 
+  * @returns { number }
   */
   getVueVersion () {
-    const version = this.getDependencyVersion('vue');
+    const version = this.packageJson?.['dependencies']?.['vue'] || ''
     return version ? version.match(/\d/)[0] : null
   }
 
   /**
-   * @description 获取所有依赖
-   * @returns 
-  */
-  getAllDependencies () {
-    const { devDependencies, dependencies } = this
-    return Object.assign({}, devDependencies, dependencies)
-  }
-
-
-  async removeConfig () {
-    await this.readPackageJson()
-    const { packageJson } = this
-    if (packageJson['eslintConfig'] || packageJson['prettier']) {
-      // 删除package.json中的eslintConfig
-      packageJson['eslintConfig'] && delete packageJson['eslintConfig']
-      // 删除package.json中的prettier
-      packageJson['prettier'] && delete packageJson['prettier']
-      return this.writePackageJson(packageJson)
-    }
-    return Promise.resolve()
+   * @description 删除 package.json 中指定的属性
+   * @param key 要删除的key
+   */
+  removeKey (key) {
+    if (this.packageJson[key]) delete this.packageJson[key];
   }
 
   /**
-   * @description 根据plugins去package.json判断依赖是否安装过
-   * @param { Array | string } plugins 依赖名字或多个依赖
-   * @returns {"eslint": true| false}
+   * @description 删除 package.json 中 eslintConfig和prettier 两个配置项
    */
-  isInstalled (plugins) {
-    const pluginNameReg = new RegExp(`"${INSTALL_PLUGIN_NAME}"`)
-    return Array.isArray(plugins)
-      ? plugins.reduce((obj, plugin) => {
-        return Object.assign(obj, {
-          [plugin]: pluginNameReg.test(this.packageJson)
-        })
-      }, {})
-      : { [plugins]: pluginNameReg.test(this.packageJson)}
+  async removeConfigFromPackageJson () {
+    const lastestPackageJson = await this.readPackageJson();
+    ['eslintConfig', 'prettier'].forEach(this.removeKey.bind(this))
+    return await this.updatePackageJson(lastestPackageJson)
   }
 }
 
 
 class FileOperator {
-  constructor () {
-    this.deleteFiles = ['.eslintrc.json', '.eslintrc.yaml', '.eslintrc.js', '.prettierrc.js','.prettierignore']
-  }
   /**
  * @description 是否初始化了 git
  * @returns Promise<Boolean>
@@ -122,6 +91,7 @@ class FileOperator {
   static isInitGit () {
     return stat('.git')
   }
+
   /**
  * @description 是否初始化了 npm
  * @returns Promise<Boolean>
@@ -129,6 +99,7 @@ class FileOperator {
   static isInitNpm () {
     return stat('package.json')
   }
+
   /**
    * @description 是否有.gitignore文件
    * @returns 
@@ -136,6 +107,7 @@ class FileOperator {
    static hasGitignore () {
     return stat('.gitignore')
   }
+  
   /**
    * @description 创建.gitignore 文件
    * @param ignoreRegs 
@@ -146,13 +118,11 @@ class FileOperator {
 
   /**
    * @description 获取 eslint 配置模板对象
-   * @returns 
+   * @param { vueVersion: Number } vue版本
   */
-  getESLintConfig (vueVersion) {
+  static getESLintConfig (vueVersion) {
     const base = {
-      extends: [
-        "eslint:recommended",
-      ],
+      extends: ["eslint:recommended"],
       rules: {}
     }
     if (vueVersion) {
@@ -166,10 +136,10 @@ class FileOperator {
   /**
    * @description 写入vscode 配置
   */
-  writeVsCodeConfig () {
+  static writeVsCodeConfig (settings) {
     return oraPromise(() => {
       if (!exists('.vscode')) mkdir('.vscode');
-      return writeFile('.vscode/settings.json', stringFormat(SETTINGS_CONFIG))
+      return writeFile('.vscode/settings.json', stringFormat(settings))
     }, {text: '配置vscode'})
   }
 
@@ -178,7 +148,7 @@ class FileOperator {
    * @param { object } newObj 写入文件的对象
    * @param { string } path 配置文件路径
    */
-  writeConfigToFile  (newObj, path) {
+  static writeConfigToFile  (newObj, path) {
     const content = jsonFormat(newObj)
     writeFile(path, content)
   }
@@ -191,19 +161,20 @@ class FileOperator {
    * .eslintrc
    * .eslintrc.yaml
    */
-  writeESLintConfig (vueVersion) {
-    const { deleteFiles } = this
+  static writeESLintConfig (vueVersion , deleteFiles = []) {
     oraPromise(() => {
       // 并发删除配置文件
       let promises = deleteFiles.reduce((promises, filePath) => promises.concat(rm(filePath)), [])
+        .map(t => t.catch(() => {}))
       const eslintConfig = this.getESLintConfig(vueVersion)
-      console.log(eslintConfig)
       // 写入eslint配置
       promises.push(this.writeConfigToFile(eslintConfig, resolve('.eslintrc')))
-      return Promise.all(promises).catch(()=>{})
+      return Promise.all(promises)
     }, { text: '配置ESLint' })
   }
 }
+
+
 
 class CommandOperator {
   constructor () {
@@ -297,14 +268,14 @@ async function installGit () {
 }
 
 const main = async () => {
-  await Promise.all([
+  const [isNotInitNpm, isNotInitGit] = await Promise.all([
     installNPM(),
     installGit()
-  ]).then(([isNotInitNpm, isNotInitGit]) => {
-    if (isNotInitNpm || isNotInitGit) {
-      CommandOperator.commit('first commit')
-    }
-  })
+  ])
+
+  if (isNotInitNpm || isNotInitGit) {
+    await CommandOperator.commit('first commit')
+  }
 
   if (await isLocalChanged()) {
     console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
@@ -326,26 +297,25 @@ const main = async () => {
 
  
   const packageIns = new Package()
-  const fileIns = new FileOperator()
 
   await packageIns.readPackageJson()
-  const commandIns = new CommandOperator(fileIns.packageJson)
+  const commandIns = new CommandOperator()
   await commandIns.init()
   const installPlugins = ['eslint-config-rich', 'eslint', 'eslint-plugin-vue']
-  const prettierPlugins = Object.keys(packageIns.devDependencies).filter(t => /prettier|eslint/.test(t))
+  const prettierPlugins = Object.keys(packageIns.packageJson?.['devDependencies'] ?? []).filter(t => /prettier|eslint/.test(t))
 
   await oraPromise(async () => {
     await commandIns.uninstallPlugins(prettierPlugins)
     await commandIns.installPlugins(installPlugins)
-    await packageIns.removeConfig()
+    await packageIns.removeConfigFromPackageJson()
   }, {text: '配置依赖'})
 
 
   const vueVersion = packageIns.getVueVersion()
 
   await Promise.all([
-    fileIns.writeESLintConfig(vueVersion),
-    fileIns.writeVsCodeConfig()
+    FileOperator.writeESLintConfig(vueVersion, DELETE_FILES),
+    FileOperator.writeVsCodeConfig(SETTINGS_CONFIG)
   ])
 
   // 格式化代码
