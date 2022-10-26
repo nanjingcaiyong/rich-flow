@@ -16,11 +16,11 @@
     "rich-pull": "bin/rich-pull",
     "rich-fetch": "bin/rich-fetch",
     "rich-reset": "bin/rich-reset",
-    "rich-run": "bin/rich-run",
     "rich-switch": "bin/rich-switch",
     "rich-add": "bin/rich-add",
     "rich-publish": "bin/rich-publish",
-    "rich-commit": "bin/rich-commit"
+    "rich-commit": "bin/rich-commit",
+    "rich-run": "bin/rich-run"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",

@@ -4,8 +4,32 @@ const { program } = require('commander');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const { command, isLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
+// 默认的vscode配置
 const SETTINGS_CONFIG = require('../.vscode/settings.json')
+// 需要删除的文件
 const DELETE_FILES = ['.eslintrc.json', '.eslintrc.yaml', '.eslintrc.js', '.prettierrc.js','.prettierignore']
+// .gitignore忽略的文件
+const GIT_IGNORE = ['node_modules', '.DS_Store', 'dist']
+const PACKAGE_INSTALLERS = {
+  'npm': {
+    command: 'npm',
+    install: "npm install",
+    uninstall: 'npm uninstall',
+    suffix: '-D'
+  },
+  'yarn': {
+    command: 'yarn',
+    install: "yarn add",
+    uninstall: 'yarn remove',
+    suffix: '--dev'
+  },
+  'pnpm': {
+    command: 'pnpm',
+    install: "pnpm add",
+    uninstall: 'pnpm remove',
+    suffix: '-D'
+  }
+}
 
 
 program
@@ -82,7 +106,6 @@ class Package {
   }
 }
 
-
 class FileOperator {
   /**
  * @description 是否初始化了 git
@@ -156,7 +179,6 @@ class FileOperator {
   /**
    * @description 删除ESLint其余的配置文件和prettier配置
    * 例如：
-   * package.json中的eslintConfig字段
    * .eslintrc.json
    * .eslintrc
    * .eslintrc.yaml
@@ -174,28 +196,16 @@ class FileOperator {
   }
 }
 
-
-
 class CommandOperator {
   constructor () {
     this.packageCommand = {};
-    this.packageConfig = {
-      'npm': {
-        command: 'npm',
-        install: "npm install",
-        uninstall: 'npm uninstall',
-        suffix: '-D'
-      },
-      'yarn': {
-        command: 'yarn',
-        install: "yarn add",
-        uninstall: 'yarn remove',
-        suffix: '--dev'
-      }
-    }
   }
 
-  async init () {
+  /**
+   * @description 初始化安装器
+   * @param { installers: Object } 安装器 
+   */
+  async init (installers) {
     let answer = await inquirer.prompt([{
       name: 'packtool',
       type: 'list',
@@ -203,7 +213,7 @@ class CommandOperator {
       choices: ['npm', 'yarn', 'pnpm'],
       default: 0
     }])
-    this.packageCommand = this.packageConfig[answer.packtool]
+    this.packageCommand = installers[answer.packtool]
   }
   /**
    * @description 安装依赖
@@ -239,13 +249,20 @@ class CommandOperator {
       })
   }
 
+  /**
+   * @description commit 代码
+   * @param { msg: string } 提交的message 
+   */
   static async commit (msg) {
     await command('git add .')
     await command(`git commit -m "${msg}"`)
   }
 }
 
-async function installNPM () {
+/**
+ * @description 初始化npm
+ */
+async function initNPM () {
   if (!await FileOperator.isInitNpm()) {
     await command(`npm init -y`);
     return true
@@ -253,30 +270,31 @@ async function installNPM () {
   return false
 }
 
-async function installGit () {
+/**
+ * @description 初始化git
+ */
+async function initGit () {
+  const promises = []
   const [isInitGit, hasGitignore] = await Promise.all([
     FileOperator.isInitGit(),
     FileOperator.hasGitignore()
   ])
-  if (!hasGitignore) {                // 是否存在.gitignore文件
-    await FileOperator.createGitIgnore(['node_modules', '.DS_Store', 'dist'])
-  }
-  if (!isInitGit) {                   // 是否初始化git
-    await command('git init')
-  }
-  return !hasGitignore || !isInitGit
+  if (hasGitignore && isInitGit) return false
+  if (!hasGitignore) promises.push(FileOperator.createGitIgnore(GIT_IGNORE));        // 不存在.gitignore文件
+  if (!isInitGit) promises.push(command('git init'));                               // 没初始化git
+
+  await Promise.all(promises)
+  return true
 }
 
 const main = async () => {
-  const [isNotInitNpm, isNotInitGit] = await Promise.all([
-    installNPM(),
-    installGit()
-  ])
+  const [isNotInitNpm, isNotInitGit] = await Promise.all([initNPM(), initGit()])
 
+  // 如果没有初始化 npm 和 git，初始化完后必须进行一次提交。否则执行 git stash 会报错：您尚未建立初始提交
   if (isNotInitNpm || isNotInitGit) {
-    await CommandOperator.commit('first commit')
+    await CommandOperator.commit('初始化 git 和 npm')
   }
-
+  // 本地是否有修改，如果有则暂存
   if (await isLocalChanged()) {
     console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
     await oraPromise(async () => {
@@ -287,20 +305,21 @@ const main = async () => {
   
    // 切换到master分支
    if (!await gitBranchIs('master')) {
-    await oraPromise(() => command('git checkout master'), {text: '切换master'})
+    await oraPromise(() => command('git checkout master'), {text: '切换 master'})
   }
 
   // 如果是远程仓库，拉取更新
   if (await isRemoteRegistry()) {
     await oraPromise(() => command('git pull'), {text: '拉取更新'})
   }
+  // 创建格式化分支
+  await oraPromise(() => command('git checkout -b standard'), {text: '创建 standard 分支'})
 
- 
   const packageIns = new Package()
 
   await packageIns.readPackageJson()
   const commandIns = new CommandOperator()
-  await commandIns.init()
+  await commandIns.init(PACKAGE_INSTALLERS)
   const installPlugins = ['eslint-config-rich', 'eslint', 'eslint-plugin-vue']
   const prettierPlugins = Object.keys(packageIns.packageJson?.['devDependencies'] ?? []).filter(t => /prettier|eslint/.test(t))
 
@@ -322,7 +341,7 @@ const main = async () => {
   await commandIns.formatCodeByEslint()
   
   await CommandOperator.commit('ci: install eslint and format')
-  console.log(chalk.green('🎉安装成功, 请到master分支查看最新一次的修改'))
+  console.log(chalk.green('🎉安装成功, 请到 standard 分支查看最新一次的修改'))
 }
 
 main()

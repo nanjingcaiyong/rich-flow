@@ -18,5 +18,6 @@ program
   .command('push', 'update remote refs along with associated objects')                       // 推送最新的代码远程
   .command('switch', 'switch branches')                                                      // 切换分支
   .command('add', 'ddd file contents to the index')                                          // 添加内容到索引
+  .command('run', '运行script')
 
 program.parse(process.argv)

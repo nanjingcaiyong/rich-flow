@@ -1,26 +1,43 @@
 #!/usr/bin/env node
 
 const { program } = require('commander');
-const shell = require('shelljs')
-
+const shell = require('shelljs');
+const chalk = require('chalk');
+const inquirer = require('inquirer');
 
 program
-  .usage('<command-name>')
-
- program.on('--help', () => {
-  console.log('  Examples:')
+  .usage('<option>')
+  
+program.on('--help', () => {
   console.log()
-  console.log(chalk.gray('    # install rich\'s plugin'))
-  console.log('    $ rich install eslint')
+  console.log(chalk.gray('    # git push to remote'))
+  console.log('    $ rich run')
   console.log()
 })
 
-function help () {
- program.parse(process.argv)
- if (program.args.length < 1) return program.help()
+function help() {
+  program.parse(process.argv)
+  if (program.args.length < 1) return program.help()
 }
 help()
 
-const commandName = program.args[0].split(':')[0]
-const envName = program.args[0].split(':')[1]
-shell.exec(`node build/${envName}.server.js ${envName}`)
+process.on('exit', () => {
+  console.log()
+})
+
+const RUN_TYPE = program.args[0]; // 安装的插件名称，例如: eslint
+async function run() {
+  let answer = await inquirer.prompt([{
+    name: 'env',
+    type: 'list',
+    message: '请选择环境',
+    choices: ['dev', 'sit', 'pre', 'prd'],
+    default: 0
+  }])
+  if (RUN_TYPE === 'dev') {
+    shell.exec(`ts-node build/dev.server.ts ${answer.env}`)
+  } else {
+    shell.exec(`ts-node build/build.ts ${answer}`)
+  }
+}
+run()
