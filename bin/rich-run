@@ -4,6 +4,7 @@ const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
+const { readFile } = require('../lib/utils.js');
 
 program
   .usage('<option>')
@@ -25,19 +26,32 @@ process.on('exit', () => {
   console.log()
 })
 
-const RUN_TYPE = program.args[0]; // 安装的插件名称，例如: eslint
+const COMMAND_TYPE = program.args[0]; // 安装的插件名称，例如: eslint
 async function run() {
-  let answer = await inquirer.prompt([{
-    name: 'env',
-    type: 'list',
-    message: '请选择环境',
-    choices: ['dev', 'sit', 'pre', 'prd'],
-    default: 0
-  }])
-  if (RUN_TYPE === 'dev') {
-    shell.exec(`ts-node build/dev.server.ts ${answer.env}`)
-  } else {
-    shell.exec(`ts-node build/build.ts ${answer}`)
+  let config = await readFile(`${process.cwd()}/script.json`);
+  config = config ? JSON.parse(config) : {};
+ 
+  if (Object.keys(config.scripts).includes(COMMAND_TYPE)) {
+    const scripts = config.scripts[COMMAND_TYPE]
+    let index = -1, answer = {}
+    while(++index < scripts.length) {
+      if (Array.isArray(scripts[index])) {
+        answer[index] = (await inquirer.prompt([{
+          name: 'option',
+          type: 'list',
+          message: scripts[index][0],
+          choices: scripts[index][1],
+          default: 0
+        }])).option
+      }
+    }
+  
+    let shellCommand = config.scripts[COMMAND_TYPE]
+      .reduce((command, keyword, index) => {
+        return command += ` ${answer[index] ?? keyword}`
+      }, '')
+      console.log(shellCommand)
+      shell.exec(shellCommand)
   }
 }
 run()
