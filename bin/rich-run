@@ -7,26 +7,27 @@ const inquirer = require('inquirer');
 const { readFile } = require('../lib/utils.js');
 
 program
-  .usage('<option>')
-  
-program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # git push to remote'))
-  console.log('    $ rich run')
-  console.log()
-})
+  .usage('run <option>')
+  .description('运行当前项目的 package.json 中 script 脚本')
+  .on('--help', () => {
+    console.log()
+    console.log(chalk.gray('    # git push to remote'))
+    console.log('    $ rich run')
+    console.log()
+  })
+  .option('-s', '--save')
+  .on('exit', () => {
+    console.log()
+  })
+  .parse(process.argv)
 
 function help() {
-  program.parse(process.argv)
   if (program.args.length < 1) return program.help()
 }
+
 help()
 
-process.on('exit', () => {
-  console.log()
-})
-
-const COMMAND_TYPE = program.args[0]; // 安装的插件名称，例如: eslint
+const COMMAND_TYPE = program.args[0]; // 执行的command
 async function run() {
   let config = await readFile(`${process.cwd()}/script.json`);
   config = config ? JSON.parse(config) : {};
@@ -47,9 +48,7 @@ async function run() {
     }
   
     let shellCommand = config.scripts[COMMAND_TYPE]
-      .reduce((command, keyword, index) => {
-        return command += ` ${answer[index] ?? keyword}`
-      }, '')
+      .reduce((command, keyword, index) => command += ` ${answer[index] ?? keyword}`, '')
       console.log(shellCommand)
       shell.exec(shellCommand)
   }

@@ -18,39 +18,30 @@ const localPath = require('../lib/local-path')
 const isLocalPath = localPath.isLocalPath
 const getTemplatePath = localPath.getTemplatePath
 
-/**
- * Usage.
- */
-
 program
+  .description('初始化项目模板')
   .usage('<template-name> [project-name]')
   .option('-c, --clone', 'use git clone')
   .option('--offline', 'use cached template')
-
-/**
- * Help.
- */
-
-program.on('--help', () => {
-  console.log('  Examples:')
-  console.log()
-  console.log(chalk.gray('    # create a new project with an official template'))
-  console.log('    $ vue init webpack my-project')
-  console.log()
-  console.log(chalk.gray('    # create a new project straight from a github template'))
-  console.log('    $ vue init username/repo my-project')
-  console.log()
-})
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # create a new project with an official template'))
+    console.log('    $ vue init webpack my-project')
+    console.log()
+    console.log(chalk.gray('    # create a new project straight from a github template'))
+    console.log('    $ vue init username/repo my-project')
+    console.log()
+  })
+  .on('exit', () => {
+    console.log()
+  })
+  .parse(process.argv)
 
 function help () {
-  program.parse(process.argv)
   if (program.args.length < 1) return program.help()
 }
 help()
-
-/**
- * Settings.
- */
 
 let template = program.args[0]
 const options = program.opts()
@@ -67,15 +58,7 @@ if (options.offline) {
   template = tmp
 }
 
-
-/**
- * Padding.
- */
-
 console.log()
-process.on('exit', () => {
-  console.log()
-})
 
 if (inPlace || exists(to)) {
   inquirer.prompt([{
@@ -93,12 +76,9 @@ if (inPlace || exists(to)) {
   run()
 }
 
-/**
- * Check, download and generate the project.
- */
 
 function run () {
-  // check if template is local
+  // 判断模版是否是本地路径
   if (isLocalPath(template)) {
     const templatePath = getTemplatePath(template)
     if (exists(templatePath)) {
@@ -113,7 +93,7 @@ function run () {
   } else {
     checkVersion(() => {
       if (!hasSlash) {
-        // use official templates
+        // 使用模板地址
         const officialTemplate = 'nanjingcaiyong/' + template
         downloadAndGenerate(officialTemplate)
       } else {
@@ -124,15 +104,14 @@ function run () {
 }
 
 /**
- * Download a generate from a template repo.
- *
+ * 从远程模板库下载一个模板
  * @param {String} template
  */
 
 function downloadAndGenerate (template) {
   const spinner = ora('downloading template')
   spinner.start()
-  // Remove if local template exists
+  // 如果没有指定--offline，则会从远程下载并覆盖本地缓存的模版
   if (exists(tmp)) rm(tmp)
   download(template, tmp, { clone }, err => {
     spinner.stop()
