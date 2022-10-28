@@ -6,7 +6,7 @@
   "bin": {
     "rich": "bin/rich",
     "rich-init": "bin/rich-init",
-    "rich-new": "bin/rich-new",
+    "rich-renew": "bin/rich-renew",
     "rich-list": "bin/rich-list",
     "rich-install": "bin/rich-install",
     "rich-lint": "bin/rich-lint",

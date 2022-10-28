@@ -7,7 +7,7 @@ program
   .usage('<command> [options]')
   .command('list', 'list available project templates')                                       // 列出可用项目模板
   .command('init', 'generate a new project from a template')                                 // 基于项目模板创建一个新项目
-  .command('new', 'start a new iteration')                                                   // 开启一个新迭代
+  .command('renew', 'start a new iteration')                                                 // 从远程master重新创建覆盖本地分支
   .command('commit', 'submit the modified code')                                             // 提交修改的代码
   .command('lint:es', 'format code according to eslint')                                     // 根据eslint格式化代码
   .command('install', 'install rich\'s plugin')                                              // 安装同构化配置
