@@ -31,29 +31,26 @@ const PACKAGE_INSTALLERS = {
   }
 }
 
-
 program
-  .usage('<plugin-name>')
-
-program.on('--help', () => {
-  console.log('  Examples:')
-  console.log()
-  console.log(chalk.gray('    # install rich\'s plugin'))
-  console.log('    $ rich install eslint')
-  console.log()
-})
+  .name('rich')
+  .usage('install <plugin-name>')
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # install rich\'s plugin'))
+    console.log('    $ rich install eslint')
+    console.log()
+  })
+  .on('exit', console.log)
+  .parse(process.argv)
 
 function help() {
-  program.parse(process.argv)
   if (program.args.length < 1) return program.help()
 }
+
 help()
 
 // const INSTALL_PLUGIN_NAME = program.args[0]; // 安装的插件名称，例如: eslint
-
-process.on('exit', () => {
-  console.log()
-})
 
 class Package {
   constructor () {

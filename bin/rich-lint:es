@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const { oraPromise, command } = require('../lib/utils.js')
+
+program
+  .name('rich')
+  .usage('lint:es [path...]')
+  // .command('lint:es [path...]')
+  .option('--fix', 'format code')
+  .on('exit',console.log)
+  .parse(process.argv)
+
+const options = program.opts();
+
+const pathes = process.argv.slice(2).filter(t=> !/^-+./.test(t))
+
+function main () {
+  let baseShell = `npx eslint --ext .js,.vue,.ts`
+  if (options.fix) baseShell += ' --fix';
+  
+  baseShell += pathes.reduce((s, p) => s += ` ${p}`, '')
+  
+  oraPromise(command.bind(null, baseShell), {text: 'lint code'})
+}
+
+main()
+

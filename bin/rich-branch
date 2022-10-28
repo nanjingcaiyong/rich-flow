@@ -4,14 +4,17 @@ const chalk = require('chalk');
 const { command, askQuestions, hasLocalChanged, oraPromise, gitBranchIs, isRemoteBranch } = require('../lib/utils.js')
 
 program
-  .usage('<branch-name> [branch-name]')
+  .name('rich')
+  .usage('branch <branch-name>')
   .option('-d, --delete',  'delete branch')
   .option('-b, --branch',  'create branch and switch')
   .on('--help', () => {
+    console.log('  Examples:')
     console.log()
     console.log(chalk.gray('    # create git\'s new branch'))
     console.log('    $ rich branch feature-f1')
-    console.log(chalk.gray('    # delete git\'s new branch'))
+    console.log()
+    console.log(chalk.gray('    # delete git\'s branch'))
     console.log('    $ rich branch -d feature-f1')
     console.log()
   })

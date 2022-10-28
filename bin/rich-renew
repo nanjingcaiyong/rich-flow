@@ -7,8 +7,9 @@ const chalk = require('chalk')
 
 
 program
+  .name('rich')
+  .usage('renew <branch> [otherBranch...]')
   .description('recreate local branch')
-  .usage('<branch> [otherBranch...]')
   .parse(process.argv)
   .on('--help', () => {
     console.log('  Examples:')

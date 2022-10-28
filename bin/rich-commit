@@ -4,28 +4,27 @@ const shell = require('shelljs');
 const chalk = require('chalk');
 
 program
+  .name('rich')
+  .usage('commit [-m] [message]')
   .option('-m, --message',  'commit message')
-
-
- program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # create git\'s new branch'))
-  console.log('    $ rich branch feature-f1')
-  console.log()
-})
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # submit git code once'))
+    console.log('    $ rich commit -m "one commit"')
+    console.log()
+  })
+  .on('exist', console.log)
+  .parse(process.argv)
 
 function help () {
- program.parse(process.argv)
  if (program.args.length < 1) return program.help()
 }
+
 help()
 
 const options = program.opts();
 let message = program.args[0]; // 模版名称
-
-process.on('exit', () => {
-  console.log()
-})
 
 function run () {
   const command = options.message ? '-m' : ''

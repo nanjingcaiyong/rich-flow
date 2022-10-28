@@ -5,26 +5,24 @@ const chalk = require('chalk');
 const { hasLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils')
 
 program
-  .usage('<branch-name>')
-
- program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # merge git\'s branch'))
-  console.log('    $ rich merge feature-t1')
-  console.log()
-})
+  .name('rich')
+  .usage('merge <branch-name>')
+  .on('--help', () => {
+    console.log()
+    console.log(chalk.gray('    # merge git\'s branch'))
+    console.log('    $ rich merge feature-t1')
+    console.log()
+  })
+  .on('exit', console.log)
+  .parse(process.argv)
 
 function help () {
- program.parse(process.argv)
  if (program.args.length < 1) return program.help()
 }
+
 help()
 
 let branchName = program.args[0];
-
-process.on('exit', () => {
-  console.log()
-})
 
 async function run () {
   const hasChange = await hasLocalChanged()

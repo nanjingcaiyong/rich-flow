@@ -7,6 +7,7 @@ const inquirer = require('inquirer');
 const { readFile } = require('../lib/utils.js');
 
 program
+  .name('rich')
   .usage('run <option>')
   .description('运行当前项目的 package.json 中 script 脚本')
   .on('--help', () => {

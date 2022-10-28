@@ -1,8 +1,13 @@
 #!/usr/bin/env node
-
+const { program } = require('commander')
 const logger = require('../lib/logger')
 const request = require('request')
 const chalk = require('chalk')
+
+program
+  .name('rich')
+  .usage('list')
+  .parse()
 
 const GITHUB = {
   url: 'https://api.github.com/users/nanjingcaiyong/repos',

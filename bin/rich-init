@@ -19,10 +19,11 @@ const isLocalPath = localPath.isLocalPath
 const getTemplatePath = localPath.getTemplatePath
 
 program
+  .name('rich')
+  .usage('init <template-name> [project-name]')
   .description('init project template')
-  .usage('<template-name> [project-name]')
   .option('-c, --clone', 'use git clone')
-  .option('--offline', 'use cached template')
+  .option('--offline', 'use local template')
   .on('--help', () => {
     console.log('  Examples:')
     console.log()
@@ -41,9 +42,10 @@ program
 function help () {
   if (program.args.length < 1) return program.help()
 }
+
 help()
 
-let template = program.args[0]
+let template = program.args[0]; // 模板名称
 const options = program.opts()
 const hasSlash = template.indexOf('/') > -1
 const rawName = program.args[1]
@@ -58,26 +60,27 @@ if (options.offline) {
   template = tmp
 }
 
-console.log()
-
-if (inPlace || exists(to)) {
-  inquirer.prompt([{
-    type: 'confirm',
-    message: inPlace
-      ? 'Generate project in current directory?'
-      : 'Target directory exists. Continue?',
-    name: 'ok'
-  }]).then(answers => {
-    if (answers.ok) {
-      run()
-    }
-  }).catch(logger.fatal)
-} else {
-  run()
+/**
+ * 从远程模板库下载一个模板
+ * @param {String} template
+ */
+ function downloadAndGenerate (template) {
+  const spinner = ora('downloading template')
+  spinner.start()
+  // 如果没有指定--offline，则会从远程下载并覆盖本地缓存的模版
+  if (exists(tmp)) rm(tmp)
+  download(template, tmp, { clone }, err => {
+    spinner.stop()
+    if (err) logger.fatal('Failed to download repo ' + template + ': ' + err.message.trim())
+    generate(name, tmp, to, err => {
+      if (err) logger.fatal(err)
+      console.log()
+      logger.success('Generated "%s".', name)
+    })
+  })
 }
 
-
-function run () {
+function main () {
   // 判断模版是否是本地路径
   if (isLocalPath(template)) {
     const templatePath = getTemplatePath(template)
@@ -103,23 +106,18 @@ function run () {
   }
 }
 
-/**
- * 从远程模板库下载一个模板
- * @param {String} template
- */
-
-function downloadAndGenerate (template) {
-  const spinner = ora('downloading template')
-  spinner.start()
-  // 如果没有指定--offline，则会从远程下载并覆盖本地缓存的模版
-  if (exists(tmp)) rm(tmp)
-  download(template, tmp, { clone }, err => {
-    spinner.stop()
-    if (err) logger.fatal('Failed to download repo ' + template + ': ' + err.message.trim())
-    generate(name, tmp, to, err => {
-      if (err) logger.fatal(err)
-      console.log()
-      logger.success('Generated "%s".', name)
-    })
-  })
+if (inPlace || exists(to)) {
+  inquirer.prompt([{
+    type: 'confirm',
+    message: inPlace
+      ? 'Generate project in current directory?'
+      : 'Target directory exists. Continue?',
+    name: 'ok'
+  }]).then(answers => {
+    if (answers.ok) {
+      main()
+    }
+  }).catch(logger.fatal)
+} else {
+  main()
 }

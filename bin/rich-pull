@@ -3,18 +3,21 @@ const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
 
+program
+  .name('rich')
+  .usage('pull')
+  .on('--help', () => {
+    console.log()
+    console.log(chalk.gray('    # git push to remote'))
+    console.log('    $ rich push')
+    console.log()
+  })
+  .on('exit', console.log)
+  .parse()
 
-program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # git push to remote'))
-  console.log('    $ rich push')
-  console.log()
-})
 
+process
 
-process.on('exit', () => {
-  console.log()
-})
 function run() {
   shell.exec(`git pull`)
 }

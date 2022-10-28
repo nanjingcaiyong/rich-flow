@@ -4,26 +4,24 @@ const shell = require('shelljs');
 const chalk = require('chalk');
 
 program
-  .usage('<branch-name> [branch-name]')
-
- program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # create git\'s new branch'))
-  console.log('    $ rich branch feature-f1')
-  console.log()
-})
+  .name('rich')
+  .usage('switch <branch-name> [branch-name]')
+  .on('--help', () => {
+    console.log()
+    console.log(chalk.gray('    # create git\'s new branch'))
+    console.log('    $ rich branch feature-f1')
+    console.log()
+  })
+  .on('exit', console.log)
+  .parse(process.argv)
 
 function help () {
- program.parse(process.argv)
- if (program.args.length < 1) return program.help()
+  if (program.args.length < 1) return program.help()
 }
+
 help()
 
 let branchName = program.args[0]; // 模版名称
-
-process.on('exit', () => {
-  console.log()
-})
 
 function run () {
   shell.exec(`git switch ${branchName}`)

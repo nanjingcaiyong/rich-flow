@@ -5,11 +5,11 @@
   "main": "index.js",
   "bin": {
     "rich": "bin/rich",
-    "rich-init": "bin/rich-init",
+    "init": "bin/rich-init",
+    "lint:es": "bin/rich-lint:es",
     "rich-renew": "bin/rich-renew",
     "rich-list": "bin/rich-list",
     "rich-install": "bin/rich-install",
-    "rich-lint": "bin/rich-lint",
     "rich-branch": "bin/rich-branch",
     "rich-merge": "bin/rich-merge",
     "rich-push": "bin/rich-push",

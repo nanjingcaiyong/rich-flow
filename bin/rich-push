@@ -5,19 +5,20 @@ const chalk = require('chalk');
 const { isRemoteBranch, gitBranchIs } = require('../lib/utils.js')
 
 program
-  .usage('<remote-name> [remote-name]')
-
-program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # git push to remote'))
-  console.log('    $ rich push')
-  console.log()
-})
+  .name('rich')
+  .usage('push <remote-name> [remote-name]')
+  .on('--help', () => {
+    console.log()
+    console.log(chalk.gray('    # git push to remote'))
+    console.log('    $ rich push')
+    console.log()
+  })
 
 function help () {
-  program.parse(process.argv)
- }
- help()
+  if (program.args.length < 1) return program.help()
+}
+
+help()
 
 const remoteName = program.args[0]
 
