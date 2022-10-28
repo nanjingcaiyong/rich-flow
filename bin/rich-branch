@@ -1,77 +1,102 @@
 #!/usr/bin/env node
 const { program } = require('commander');
-const shell = require('shelljs');
 const chalk = require('chalk');
-const { prefixReg } = require('../lib/regex')
-const inquirer = require('inquirer');
-const ENV_BRANCHES = ['master', 'pre', 'test', 'dev']; // 环境分支
-const FIX_PREFIX = 'fix-';
-const FEATURE_PREFIX = 'feature-';
+const { command, askQuestions, hasLocalChanged, oraPromise, gitBranchIs, isRemoteBranch } = require('../lib/utils.js')
 
 program
   .usage('<branch-name> [branch-name]')
   .option('-d, --delete',  'delete branch')
   .option('-b, --branch',  'create branch and switch')
-
- program.on('--help', () => {
-  console.log()
-  console.log(chalk.gray('    # create git\'s new branch'))
-  console.log('    $ rich branch feature-f1')
-  console.log(chalk.gray('    # delete git\'s new branch'))
-  console.log('    $ rich branch -d feature-f1')
-  console.log()
-})
+  .on('--help', () => {
+    console.log()
+    console.log(chalk.gray('    # create git\'s new branch'))
+    console.log('    $ rich branch feature-f1')
+    console.log(chalk.gray('    # delete git\'s new branch'))
+    console.log('    $ rich branch -d feature-f1')
+    console.log()
+  })
+  .on('exit', console.log)
+  .parse(process.argv)
 
 function help () {
- program.parse(process.argv)
- if (program.args.length < 1) return program.help()
+  if (program.args.length < 1) return program.help()
 }
+
 help()
 
-const options = program.opts(); // 可选参数
+const options = program.opts();  // 定义的option
 
-let branchName = program.args[0]; // 模版名称
+let branchName = program.args[0]; // 分支名称
 
-process.on('exit', () => {
-  console.log()
-})
+function askBranchType () {
+  return askQuestions([{
+    type: 'list',
+    choices: ['fix', 'feat', 'ued', 'ci'],
+    message: 'please select the branch type to be created',
+    name: 'type'
+  }])
+}
 
 /**
  * @description 创建新分支
  * @param { branchName: string } 分支名称
  */
 async function createBranch (branchName) {
-  let newBranchName = branchName
-  if (!(ENV_BRANCHES.includes(branchName) || prefixReg(FIX_PREFIX).test(branchName) || prefixReg(FEATURE_PREFIX).test(branchName))) {
-    const answer = await inquirer.prompt([{
-      type: 'confirm',
-      message: `Do you want to create a branch called feature-${branchName}? (y/n)`,
-      name: 'overwrite'
-    }])
-    newBranchName = (answer.overwrite ? 'feature-' : 'fix-') + newBranchName
-    console.log(chalk.yellow(`WARN: The branch naming format is wrong. The prefix "feature -" or "fix -" is missing. It has been renamed to "${newBranchName}" for you`))
-  }
-  if (options.branch) {
-    shell.exec(`git checkout -b ${newBranchName}`)
-  } else {
-    shell.exec(`git branch ${newBranchName}`)
-  }
+  const answer = await askBranchType()
+  let newBranchName = `${answer.type}/${branchName}`
+  let promise = options.branch ? command(`git checkout -b ${newBranchName}`) : command(`git branch ${newBranchName}`)
+  return promise.then(() => newBranchName).catch(() => { throw newBranchName })
 }
 
 /**
  * @description 删除分支
  * @param { branchName: string } 分支名称
  */
-function deleteBranch (branchName) {
-  shell.exec(`git branch -D ${branchName}`)
+async function deleteBranch (branchName) {
+  const answer = await askBranchType()
+  let newBranchName = `${answer.type}/${branchName}`
+  return command(`git branch -D ${newBranchName}`)
+    .catch(() => {
+      console.log(chalk.red(`Failed to delete. There is no branch named '${newBranchName}'`))
+    })
 }
 
-async function run () {
-  if (options.delete) {
-    deleteBranch(branchName)
-  } else {
-    await createBranch(branchName)
+/**
+ * @description 暂存本地修改
+ */
+async function stashCode () {
+  // 本地是否有修改，如果有则暂存
+  if (await hasLocalChanged()) {
+    console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
+    await oraPromise(async () => {
+      await command('rm -rf .git/index.lock')
+      await command('git add .')
+      await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
+    }, {text: '暂存代码'})
   }
 }
 
-run()
+async function fetchCode () {
+  const currentBranchName = await gitBranchIs()
+  if (await isRemoteBranch(currentBranchName)) {
+    await command('git pull')
+  }
+}
+
+async function main () {
+  await stashCode()
+  await fetchCode()
+  if (options.delete) {
+    deleteBranch(branchName)
+  } else {
+    createBranch(branchName)
+      .then((newBranchName) => {
+        console.log(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
+      })
+      .catch((newBranchName) => {
+        console.log(chalk.red(`Failed to create. A branch named '${newBranchName}' already exists`))
+      })
+  }
+}
+
+main()
