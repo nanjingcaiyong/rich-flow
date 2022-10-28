@@ -19,7 +19,7 @@ const isLocalPath = localPath.isLocalPath
 const getTemplatePath = localPath.getTemplatePath
 
 program
-  .description('初始化项目模板')
+  .description('init project template')
   .usage('<template-name> [project-name]')
   .option('-c, --clone', 'use git clone')
   .option('--offline', 'use cached template')
@@ -27,10 +27,10 @@ program
     console.log('  Examples:')
     console.log()
     console.log(chalk.gray('    # create a new project with an official template'))
-    console.log('    $ vue init webpack my-project')
+    console.log('    $ rich init mpa my-project')
     console.log()
     console.log(chalk.gray('    # create a new project straight from a github template'))
-    console.log('    $ vue init username/repo my-project')
+    console.log('    $ rich init username/repo my-project')
     console.log()
   })
   .on('exit', () => {
@@ -52,7 +52,7 @@ const name = inPlace ? path.relative('../', process.cwd()) : rawName
 const to = path.resolve(rawName || '.')
 const clone = options.clone || false
 
-const tmp = path.join(home, '.vue-templates', template.replace(/[\/:]/g, '-'))
+const tmp = path.join(home, '.rich-templates', template.replace(/[\/:]/g, '-'))
 if (options.offline) {
   console.log(`> Use cached template at ${chalk.yellow(tildify(tmp))}`)
   template = tmp

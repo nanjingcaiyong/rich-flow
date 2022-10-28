@@ -3,7 +3,7 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
-const { command, isLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
+const { command, hasLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
 // 默认的vscode配置
 const SETTINGS_CONFIG = require('../.vscode/settings.json')
 // 需要删除的文件
@@ -295,11 +295,11 @@ const main = async () => {
     await CommandOperator.commit('初始化 git 和 npm')
   }
   // 本地是否有修改，如果有则暂存
-  if (await isLocalChanged()) {
+  if (await hasLocalChanged()) {
     console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
     await oraPromise(async () => {
       await command('git add .')
-      await command('git stash push')
+      await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
     }, {text: '暂存代码'})
   }
   

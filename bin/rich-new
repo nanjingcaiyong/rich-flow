@@ -2,13 +2,29 @@
 
 const shell = require('shelljs');
 const { program } = require('commander');
-const { gitBranchIs } = require('../lib/utils.js')
+const { gitBranchIs, hasLocalChanged, command, oraPromise } = require('../lib/utils.js')
+const chalk = require('chalk')
+
+
+program
+  .description('recreate local branch')
+  .usage('<branch> [otherBranch...]')
+  .parse(process.argv)
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # recreate local branch from remote master'))
+    console.log('    $ rich new dev sit pre')
+    console.log()
+    console.log()
+  })
+  .on('exit', console.log)
 
 function help () {
   // 通过program.parse(arguments)方法处理参数，没有被使用的选项会存放在program.args数组中
-  program.parse(process.argv)
-  // if (program.args.length < 1) return program.help()
+  if (program.args.length < 1) return program.help()
 }
+
 help()
 
 let branches = program.args || []
@@ -27,8 +43,16 @@ const switchBranch = (branchName) => {
 }
 
 async function run() {
+  // 本地是否有修改，如果有则暂存
+  if (await hasLocalChanged()) {
+    console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
+    await oraPromise(async () => {
+      await command('rm -rf .git/index.lock')
+      await command('git add .')
+      await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
+    }, {text: '暂存代码'})
+  }
   const isMasterBranch = await gitBranchIs('master')
-  console.log(isMasterBranch)
   if (isMasterBranch) {
     updateCode()
     branches.forEach(updateBranch)

@@ -2,7 +2,7 @@
 const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const { isLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils')
+const { hasLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils')
 
 program
   .usage('<branch-name>')
@@ -27,7 +27,7 @@ process.on('exit', () => {
 })
 
 async function run () {
-  const hasChange = await isLocalChanged()
+  const hasChange = await hasLocalChanged()
   if (hasChange) {
     console.log('there are uncommitted codes')
     return;
