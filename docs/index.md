@@ -7,7 +7,7 @@ titleTemplate: The official js for rich
 hero:
   name: rich-flow
   text: 前端工作流和规范
-  tagline: 致力于提升研发效率和规范的工程化解决方案
+  tagline: 一个便捷的命令行工具。致力于改进前端开发的工作流程和标准
   actions:
     - theme: brand
       text: 开始学习
@@ -18,9 +18,11 @@ hero:
 
 features:
   - title: 创建项目
-    details: 此模块提供初始化 c端、b端 等项目模版
+    details: 此模块提供初始化多种定制化项目模板(mpa、server、doc等)
+  - title: 同构npm脚本
+    details: 此模块提供项目启动、打包、代码规范校验、格式化等
   - title: Git操作
-    details: 此模块提供封装后的 Git 命令
-  - title: 规范检查
-    details: 此模块提供 ESLint、StyleLint、CommitLint 等规范检查
+    details: 此模块提供更加简介的 Git 命令集
+  - title: 安装规范化插件
+    details: 此模块提供 ESLint、StyleLint、CommitLint 的自动化安装
 ---

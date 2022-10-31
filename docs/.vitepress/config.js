@@ -8,33 +8,81 @@ const config = defineConfig({
   themeConfig: {
     sidebar: [
       {
-        text: '创建项目',
+        text: '初始化',
         collapsible: true,
         items: [
           {
-            text: '初始化项目',
+            text: '项目安装',
+            link: '/install.md'
+          },
+          {
+            text: '使用模板',
             link: '/project.md'
-          }
-        ]
-      },
-      {
-        text: 'Git',
-        collapsible: true,
-        items: [
+          },
           {
-            text: '命令封装',
-            link: '/git.md'
+            text: '启动脚本',
+            link: '/start.md'
           }
         ]
       },
       {
-        text: '规范检查',
+        text: '安装插件',
         collapsible: true,
         items: [
           {
             text: 'ESLint',
             link: '/eslint.md'
+          },
+          {
+            text: 'StyleLint',
+            link: '/eslint.md'
+          },
+          {
+            text: 'CommitLint',
+            link: '/eslint.md'
           }
+        ]
+      },
+      {
+        text: 'Git集',
+        collapsible: true,
+        items: [
+          {
+            text: 'renew',
+            link: '/git.md'
+          },
+          {
+            text: 'add',
+            link: '/git.md'
+          },
+          {
+            text: 'branch',
+            link: '/git.md'
+          },
+          {
+            text: 'commit',
+            link: '/git.md'
+          },
+          {
+            text: 'fetch',
+            link: '/git.md'
+          },
+          {
+            text: 'merge',
+            link: '/git.md'
+          },
+          {
+            text: 'pull',
+            link: '/git.md'
+          },
+          {
+            text: 'push',
+            link: '/git.md'
+          },
+          {
+            text: 'switch',
+            link: '/git.md'
+          },
         ]
       },
       {
@@ -42,7 +90,11 @@ const config = defineConfig({
         collapsible: true,
         items: [
           {
-            text: 'publish',
+            text: '升级版本',
+            link: '/npm.md'
+          },
+          {
+            text: '发包',
             link: '/npm.md'
           }
         ]

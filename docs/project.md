@@ -1,10 +1,5 @@
-# 初始化模板
+# 快速创建
 
-进入你想创建项目的目录，使用 `rich init` 命令即可创建项目
-
-![初始化项目](/assets/project-init.gif)
-
-rich-flow 会让你从现有的项目模板中选择一个来创建项目。它是一个多模板脚手架，用它创建 c端 或 b端项目模板。
 
 ## 查看项目模板
 
@@ -12,14 +7,27 @@ rich-flow 会让你从现有的项目模板中选择一个来创建项目。它�
 rich list
 ```
 
-![初始化项目](/assets/project-template.png)
+![项目模板](/assets/templates.png)
 
-## 下载项目模板
+## 初始化模板
 
-rich init \<模板名称\> \<项目名称\>
+进入你想创建项目的目录，使用 `rich init <template>` 命令即可创建项目
 
-```bash
-rich init rich-basicPlatform hello-world
+
+## 创建项目目录并初始化模版
+
+rich init \<template\> \<project\>
+
+```sh
+rich init mpa hello-world
 ```
 
-![初始化项目](/assets/project-new.png)
+![初始化项目](/assets/init.png)
+
+## 利用缓存的模版初始化项目
+
+为了提高二次使用模板的效率，可以添加 --offline 选项，提高初始化项目速度
+
+```sh
+rich init mpa hello-world --offline
+```
