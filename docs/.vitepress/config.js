@@ -57,7 +57,7 @@ const config = defineConfig({
           },
           {
             text: 'branch',
-            link: '/git.md'
+            link: '/git/branch.md'
           },
           {
             text: 'commit',

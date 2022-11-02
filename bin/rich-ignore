@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+const { program } = require('commander');
+const { command, stat, readFile, writeFile, oraPromise } = require('../lib/utils')
+const chalk = require('chalk')
+const path = require('path')
+
+program
+  .name('rich')
+  .usage('ignore <filename>')
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # ignore specified file'))
+    console.log('    $ rich ignore .DS_Store')
+    console.log()
+  })
+  .on('exit', console.log)
+  .parse(process.argv)
+
+function help () {
+  if (process.argv.length < 1 ) return program.help();
+}
+
+help()
+
+const fileName = process.argv[2]
+
+async function addGitignore () {
+  const rootPath = path.resolve(process.cwd(), '.gitignore')
+  const fileGlob = `*/${fileName}`
+  if (await stat('.gitignore')) {               // 有.gitignore文件
+    const content = await readFile(rootPath)
+    if (content.indexOf(fileGlob) === -1) {     // fileGlob 是否已存在
+      writeFile(rootPath, content + '\n' + fileGlob)
+    }
+  } else {
+    writeFile(rootPath, fileGlob)
+  }
+}
+
+async function main () {
+  await oraPromise(() => {
+    return Promise.all([
+        addGitignore(),
+        command(`find . -name ${fileName} -print0 | xargs -0 git rm --ignore-unmatch`)
+      ].map(t => t.catch(console.log)))
+    },
+    { text: `add ignore ${fileName} file` }
+  )
+}
+
+main()

@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 const { program } = require('commander');
 const chalk = require('chalk');
-const { command, askQuestions, hasLocalChanged, oraPromise, gitBranchIs, isRemoteBranch } = require('../lib/utils.js')
+const { command, askQuestions, hasLocalChanged, oraPromise, gitBranchIs, isRemoteBranch, exec } = require('../lib/utils.js')
 
 program
   .name('rich')
   .usage('branch <branch-name>')
   .option('-d, --delete',  'delete branch')
   .option('-b, --branch',  'create branch and switch')
+  .option('-s, --search',  'search branch')
   .on('--help', () => {
     console.log('  Examples:')
     console.log()
@@ -31,6 +32,11 @@ const options = program.opts();  // 定义的option
 
 let branchName = program.args[0]; // 分支名称
 
+
+/**
+ * @description 询问分支类型
+ * @returns {  }
+ */
 function askBranchType () {
   return askQuestions([{
     type: 'list',
@@ -79,27 +85,81 @@ async function stashCode () {
   }
 }
 
-async function fetchCode () {
+/**
+ * @description 拉取最新代码
+ */
+async function pullCode () {
   const currentBranchName = await gitBranchIs()
   if (await isRemoteBranch(currentBranchName)) {
     await command('git pull')
   }
 }
 
-async function main () {
+/**
+ * @description 删除分支
+ * @param branchName 分支名称
+ * @returns 
+ */
+async function onDelete (branchName) {
   await stashCode()
-  await fetchCode()
-  if (options.delete) {
-    deleteBranch(branchName)
-  } else {
-    createBranch(branchName)
-      .then((newBranchName) => {
-        console.log(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
+  await pullCode()
+  if (!options.delete) return 'next'
+  return deleteBranch(branchName)
+}
+
+/**
+ * @description 创建分支
+ * @param branchName 分支名称
+ * @returns 
+ */
+ function onCreate (branchName) {
+  return createBranch(branchName)
+    .then((newBranchName) => {
+      console.log(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
+    })
+    .catch((newBranchName) => {
+      console.log(chalk.red(`Failed to create. A branch named '${newBranchName}' already exists`))
+    })
+}
+
+/**
+ * @description 分支模糊搜索
+ * @param keyword 分支关键字
+ * @returns 
+ */
+function onSearch (keyword) {
+  if (!options.search) return 'next'
+  return exec(`git branch | grep ${keyword}`)
+    .then(res => {
+      res.stdout.split(/\n\s/g).forEach(t => {
+        console.log(res.stdout)
+        let branchName = t.replace(/[\n|\s]/g, '')
+        if (branchName[0] === '*') {
+          console.log(`${chalk.green('*')} ${branchName.slice(1)}`)
+          return
+        }
+        console.log(branchName)
       })
-      .catch((newBranchName) => {
-        console.log(chalk.red(`Failed to create. A branch named '${newBranchName}' already exists`))
-      })
+    })
+}
+
+
+/**
+ * @description 分支操作责任链链
+ * @param branchName 
+ * @param handlers 
+ */
+async function chain (branchName, handlers) {
+  let index = -1
+  while(++index < handlers.length) {
+    if (await handlers[index](branchName) !== 'next') {
+      break
+    }
   }
+}
+
+async function main () {
+  await chain(branchName, [onDelete, onSearch, onCreate])
 }
 
 main()

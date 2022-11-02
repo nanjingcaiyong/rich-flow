@@ -18,6 +18,7 @@ program
   .command('merge', 'join two or more development histories together')                       // 合并特性分支
   .command('pull', 'fetch from and integrate with another repository or a local branch')     // 更新最新代码
   .command('push', 'update remote refs along with associated objects')                       // 推送最新的代码远程
-  .command('run', 'run scripts')
+  .command('run', 'run scripts')                                                             // 运行目标项目的script脚本
   .command('switch', 'switch branches')                                                      // 切换分支
+  .command('ignore', 'ignore specified file')                                                // 忽略指定文件
   .parse(process.argv)

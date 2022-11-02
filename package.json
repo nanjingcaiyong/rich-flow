@@ -20,7 +20,8 @@
     "rich-add": "bin/rich-add",
     "rich-publish": "bin/rich-publish",
     "rich-commit": "bin/rich-commit",
-    "rich-run": "bin/rich-run"
+    "rich-run": "bin/rich-run",
+    "rich-ignore": "bin/rich-ignore.js"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
