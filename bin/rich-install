@@ -251,8 +251,7 @@ class CommandOperator {
    * @param { msg: string } 提交的message 
    */
   static async commit (msg) {
-    await command('git add .')
-    await command(`git commit -m "${msg}"`)
+    await command(`git commit -am "${msg}"`)
   }
 }
 

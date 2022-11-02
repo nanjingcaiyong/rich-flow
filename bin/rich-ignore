@@ -39,14 +39,17 @@ async function addGitignore () {
 }
 
 async function main () {
-  await oraPromise(() => {
-    return Promise.all([
-        addGitignore(),
-        command(`find . -name ${fileName} -print0 | xargs -0 git rm --ignore-unmatch`)
-      ].map(t => t.catch(console.log)))
-    },
-    { text: `add ignore ${fileName} file` }
-  )
+  if (await stat('.git')) {
+    return oraPromise(() => {
+      return Promise.all([
+          addGitignore(),
+          command(`find . -name ${fileName} -print0 | xargs -0 git rm --ignore-unmatch`)
+        ].map(t => t.catch(console.log)))
+      },
+      { text: `add ignore ${fileName} file` }
+    )
+  }
+  console.log(chalk.red('Error: Uninitialized git'))
 }
 
 main()

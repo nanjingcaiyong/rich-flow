@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const { oraPromise, command } = require('../lib/utils.js')
+
+program
+  .name('rich')
+  .usage('lint:style [path...]')
+  // .command('lint:es [path...]')
+  .option('--fix', 'format code')
+  .on('exit',console.log)
+  .parse(process.argv)
+
+const options = program.opts();
+
+const pathes = process.argv.slice(2).filter(t=> !/^-+./.test(t)) || []
+const suffix= ' *.{css,scss,sass,less,vue}'
+
+function main () {
+  let baseShell = `npx stylelint`
+
+  baseShell += pathes.length 
+    ? pathes.reduce((s, p) => s += ` ${p}`, '')
+    : suffix
+
+  if (options.fix) baseShell += ' --fix';
+  
+  oraPromise(command.bind(null, baseShell), {text: 'lint code'})
+}
+
+main()
+
