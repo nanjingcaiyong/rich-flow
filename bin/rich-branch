@@ -131,15 +131,7 @@ function onSearch (keyword) {
   if (!options.search) return 'next'
   return exec(`git branch | grep ${keyword}`)
     .then(res => {
-      res.stdout.split(/\n\s/g).forEach(t => {
-        console.log(res.stdout)
-        let branchName = t.replace(/[\n|\s]/g, '')
-        if (branchName[0] === '*') {
-          console.log(`${chalk.green('*')} ${branchName.slice(1)}`)
-          return
-        }
-        console.log(branchName)
-      })
+      console.log(res.stdout)
     })
 }
 
