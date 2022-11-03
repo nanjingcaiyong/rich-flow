@@ -1,11 +1,11 @@
-# rich-flow
+# rich-workflow
 
 > rich 工作流. 覆盖项目全链路生命周期，在于统一脚手架、同构化方案、命令，集中维护、管理，更具语义化
 
 安装
 
 ```sh
-npm i rich-flow -g
+npm i rich-workflow -g
 ```
 
 ## 脚手架
@@ -153,3 +153,8 @@ rich install jsonlint
 
 - Guist ID: 2c25224b6d8916672ab2e86dfb37e20a
 - Token: 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
+
+
+## 异常
+1、因为没有将钩子 '.husky/commit-msg' 设置为可执行，钩子被忽略
+> 这是因为当前的文件没有执行权限，只需要执行chmod +x .husky/pre-commit更改文件为可执行即可。
