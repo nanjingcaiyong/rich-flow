@@ -1,5 +1,5 @@
 {
-  "name": "rich-flow",
+  "name": "rich-workflow",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -27,6 +27,10 @@
     "lint": "eslint --ext .js,.ts lib",
     "lint:fix": "eslint --fix --ext .js,.ts lib",
     "release": "standard-version --infile docs/CHANGELOG.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nanjingcaiyong/rich-workflow"
   },
   "keywords": [],
   "author": {
@@ -60,8 +64,7 @@
     "node": ">=6.0.0"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.2",
