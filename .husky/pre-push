@@ -3,4 +3,3 @@
 
 PATH="/usr/local/bin:$PATH"
 bash deploy.sh
-undefined
