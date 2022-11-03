@@ -12,7 +12,6 @@ program
   .command('lint:es', 'format code according to eslint')                                     // 根据eslint格式化代码
   .command('lint:style', 'format code according to styelint')                                // 根据stylelint格式化代码
   .command('renew', 'start a new iteration')                                                 // 从远程master重新创建覆盖本地分支
-  .command('add', 'ddd file contents to the index')                                          // 添加内容到索引
   .command('branch', 'create a new branch')                                                  // 创建新的特性分支
   .command('merge', 'join two or more development histories together')                       // 合并特性分支
   .command('push', 'update remote refs along with associated objects')                       // 推送最新的代码远程

@@ -6,7 +6,7 @@ const { isRemoteBranch, gitBranchIs } = require('../lib/utils.js')
 
 program
   .name('rich')
-  .usage('push <remote-name> [remote-name]')
+  .usage('push')
   .on('--help', () => {
     console.log()
     console.log(chalk.gray('    # git push to remote'))
@@ -28,16 +28,13 @@ process.on('exit', () => {
 
 
 async function run() {
-  const curBranchName = await gitBranchIs()
-  const isRemote = await isRemoteBranch(curBranchName) 
+  const localName = await gitBranchIs()
+  const isRemote = await isRemoteBranch(localName) 
   if (!isRemote && remoteName) {
-    shell.exec(`git push ${remoteName} -u ${curBranchName}`)
+    shell.exec(`git push ${remoteName} -u ${localName}`)
   } else {
     shell.exec('git push')
   }
 }
 
-// command().then(res => {
-//   console.log(res.split('\n'))
-// })
 run()

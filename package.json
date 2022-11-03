@@ -12,7 +12,6 @@
     "lint:es": "bin/rich-lint:es",
     "lint:style": "bin/rich-lint:style",
     "rich-renew": "bin/rich-renew",
-    "rich-add": "bin/rich-add",
     "rich-branch": "bin/rich-branch",
     "rich-merge": "bin/rich-merge",
     "rich-push": "bin/rich-push",
