@@ -34,9 +34,7 @@ program
     console.log('    $ rich init username/repo my-project')
     console.log()
   })
-  .on('exit', () => {
-    console.log()
-  })
+  .on('exit', console.log)
   .parse(process.argv)
 
 function help () {

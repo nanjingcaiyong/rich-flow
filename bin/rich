@@ -17,4 +17,5 @@ program
   .command('push', 'update remote refs along with associated objects')                       // 推送最新的代码远程
   .command('ignore', 'ignore specified file')                                                // 忽略指定文件
   .command('release', 'upgrade version no')
+  .command('license', 'generate license')
   .parse(process.argv)

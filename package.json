@@ -16,7 +16,8 @@
     "rich-merge": "bin/rich-merge",
     "rich-push": "bin/rich-push",
     "rich-ignore": "bin/rich-ignore",
-    "rich-release": "bin/rich-release"
+    "rich-release": "bin/rich-release",
+    "rich-license": "bin/rich-license"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -55,6 +56,7 @@
     "request": "^2.88.2",
     "semver": "^7.3.5",
     "shelljs": "^0.8.5",
+    "spdx-license-list": "^6.6.0",
     "tildify": "^2.0.0",
     "user-home": "^3.0.0",
     "validate-npm-package-name": "^3.0.0"

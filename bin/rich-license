@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+
+const { program } = require('commander')
+const fs = require('fs')
+const path = require('path')
+const inquirer = require('inquirer')
+const spdxLicenseList = require('spdx-license-list/full');
+const { liscense } = require('../lib/questions')
+
+program
+  .name('rich')
+  .usage('license')
+  .option('-y, --year', 'ssss')
+  .option('-h, --holder', '')
+  .on('--help', () => {
+
+  })
+  .on('exit', console.log)
+  .parse(process.argv)
+
+function help () {
+  if (program.args.length < 2) return program.help()
+}
+help()
+
+async function main () {
+  const answer = await inquirer.prompt([liscense])
+  const content = spdxLicenseList[answer.option].licenseText
+    .replace(/<year>/g, program.args[0])
+    .replace(/<copyright holders>/g, program.args[1])
+  
+  fs.writeFile(path.resolve(process.cwd(), 'LICENSE'), content, () => {})
+}
+
+main()
