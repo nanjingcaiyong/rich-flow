@@ -2,8 +2,9 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command } = require('../lib/utils')
-
+const { command, hasLocalChanged, readFile } = require('../lib/utils')
+const inquirer = require('inquirer')
+const { needPush, needTag, version } = require('../lib/questions')
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
@@ -52,16 +53,33 @@ program
   })
   .on('exit', console.log)
 
-const options = process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
+let options = process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
 
-function help () {
-  if (process.argv.length < 3) return program.help()
-}
+async function main () {
+  if (await hasLocalChanged()) {
+    console.log(chalk.yellow('[Waring]: There are uncommitted codes'))
+    return
+  }
+  // 如果没有指定版本，弹出交互命令
+  if (process.argv.length < 3) {
+    const asw1 = await inquirer.prompt([version])
+    options = asw1.option
+  }
 
-help()
-
-function main () {
-  command(`npm version ${options}`).catch(() => {})
+// 是否需要推送代码
+  const asw2 = await inquirer.prompt([needTag])
+  if (asw2.isTag === false) {
+    options += ' --no-git-tag-version'
+  }
+  const v = await command(`npm version ${options}`)
+  if (asw2.isTag === false) {
+    command('git add .')
+    command(`git commit -m ${v.replace('v', '')}`)
+  }
+  const asw3 = await inquirer.prompt([needPush])
+  if (asw3.isPush) {
+    command('git push')
+  }
 }
 
 main()
