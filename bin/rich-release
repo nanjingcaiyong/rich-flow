@@ -73,12 +73,12 @@ async function main () {
   }
   const v = await command(`npm version ${options}`)
   if (asw2.isTag === false) {
-    command('git add .')
-    command(`git commit -m ${v.replace('v', '')}`)
+    await command('git add .')
+    await command(`git commit -m ${v.replace('v', '')}`)
   }
   const asw3 = await inquirer.prompt([needPush])
   if (asw3.isPush) {
-    command('git push')
+    await command('git push')
   }
 }
 
