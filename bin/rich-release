@@ -2,7 +2,7 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command, hasLocalChanged, readFile } = require('../lib/utils')
+const { command, hasLocalChanged } = require('../lib/utils')
 const inquirer = require('inquirer')
 const { needPush, needTag, version } = require('../lib/questions')
 program
