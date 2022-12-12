@@ -31,13 +31,14 @@ async function run () {
     return;
   }
   try {
+    // 默认git merge 采用 fast-forward
     command(`git merge ${branchName} --squash`)
   } catch (err) {
     return
   }
   const isRemote = await isRemoteBranch(branchName)
   gitBranchIs('master').then((isMasterBranch) => {
-   // 如果合并的是master 并且 是远程分支，才会删除
+   // 如果合并的是 master 并且 是远程分支，才会删除
    if (isMasterBranch && isRemote) {
     shell.exec(`git push origin -d ${branchName}`)
    }

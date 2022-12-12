@@ -9,11 +9,10 @@ const { readFile } = require('../lib/utils.js');
 program
   .name('rich')
   .usage('run <option>')
-  .description('运行当前项目的 package.json 中 script 脚本')
   .on('--help', () => {
     console.log()
-    console.log(chalk.gray('    # git push to remote'))
-    console.log('    $ rich run')
+    console.log(chalk.gray('    # run the script in the package.json of the current project'))
+    console.log('    $ rich run dev')
     console.log()
   })
   .option('-s', '--save')

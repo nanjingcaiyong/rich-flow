@@ -2,11 +2,18 @@
 
 const { program } = require('commander');
 const { oraPromise, command } = require('../lib/utils.js')
+const chalk = require('chalk')
 
 program
   .name('rich')
   .usage('lint:style [path...]')
-  // .command('lint:es [path...]')
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # format style code'))
+    console.log('    $ rich lint:style')
+    console.log()
+  })
   .option('--fix', 'format code')
   .on('exit',console.log)
   .parse(process.argv)

@@ -7,7 +7,14 @@ const chalk = require('chalk')
 program
   .name('rich')
   .usage('list')
-  .parse()
+  .on('--help', () => {
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # list all project templates'))
+    console.log('    $ rich list')
+    console.log()
+  })
+  .parse(process.argv)
 
 const GITHUB = {
   url: 'https://api.github.com/users/nanjingcaiyong/repos',

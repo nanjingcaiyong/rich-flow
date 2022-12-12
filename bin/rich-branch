@@ -13,10 +13,13 @@ program
     console.log('  Examples:')
     console.log()
     console.log(chalk.gray('    # create git\'s new branch'))
-    console.log('    $ rich branch feature-f1')
+    console.log('    $ rich branch feat/f1')
     console.log()
     console.log(chalk.gray('    # delete git\'s branch'))
-    console.log('    $ rich branch -d feature-f1')
+    console.log('    $ rich branch -d feat/f1')
+    console.log()
+    console.log(chalk.gray('    # search git\'s branch'))
+    console.log('    $ rich branch -s f1')
     console.log()
   })
   .on('exit', console.log)
@@ -131,7 +134,9 @@ function onSearch (keyword) {
   if (!options.search) return 'next'
   return exec(`git branch | grep ${keyword}`)
     .then(res => {
-      console.log(res.stdout)
+      console.log(chalk.green(res.stdout))
+    }).catch(() => {
+      console.log(chalk.red('Unmatched'))
     })
 }
 

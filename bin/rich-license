@@ -6,14 +6,19 @@ const path = require('path')
 const inquirer = require('inquirer')
 const spdxLicenseList = require('spdx-license-list/full');
 const { liscense } = require('../lib/questions')
+const chalk = require('chalk')
 
 program
   .name('rich')
   .usage('license')
-  .option('-y, --year', 'ssss')
-  .option('-h, --holder', '')
+  .option('-y, --year', 'copyright')
+  .option('-h, --holder', 'holders')
   .on('--help', () => {
-
+    console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # create license file'))
+    console.log('    $ rich license --year 2021-2023 --holder rich-flow')
+    console.log()
   })
   .on('exit', console.log)
   .parse(process.argv)

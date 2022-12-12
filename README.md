@@ -19,6 +19,9 @@ rich list
 ### 创建项目   ✅
 ```sh
 rich init <模板名称> [项目名称]
+
+# 利用本地的模板缓存创建项目
+rich init <模板名称> [项目名称] --offline
 ```
 
 ### 运行脚本  ✅
@@ -81,6 +84,11 @@ rich ignore .DS_Store
 ```
 
 ## 4、安装插件
+
+## 5、安装license
+```sh
+
+```
 
 ### ESLint ✅
 
