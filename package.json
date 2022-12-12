@@ -1,7 +1,7 @@
 {
   "name": "rich-workflow",
   "version": "0.1.4",
-  "description": "",
+  "description": "covering the entire chain life cycle of the project, in the unified scaffolding, isomorphic scheme, command, centralized maintenance and management, more meaningful",
   "main": "index.js",
   "bin": {
     "rich": "bin/rich",
@@ -32,7 +32,14 @@
     "type": "git",
     "url": "https://github.com/nanjingcaiyong/rich-workflow"
   },
-  "keywords": [],
+  "keywords": [
+    "cli",
+    "workflow",
+    "commands",
+    "lint",
+    "release",
+    "git"
+  ],
   "author": {
     "name": "yong.cai",
     "email": "yong.cai@kapeixi.com"

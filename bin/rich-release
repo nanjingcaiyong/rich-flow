@@ -2,7 +2,7 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command, hasLocalChanged } = require('../lib/utils')
+const { command, hasLocalChanged, gitBranchIs } = require('../lib/utils')
 const inquirer = require('inquirer')
 const { needPush, needTag, version } = require('../lib/questions')
 program
@@ -54,6 +54,7 @@ program
   .on('exit', console.log)
 
 let options = process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
+let asw2 = null
 
 async function main () {
   if (await hasLocalChanged()) {
@@ -66,16 +67,21 @@ async function main () {
     options = asw1.option
   }
 
-// 是否需要推送代码
-  const asw2 = await inquirer.prompt([needTag])
-  if (asw2.isTag === false) {
+  // 是否需要推送代码
+  if (await gitBranchIs('master')) {
+    asw2 = await inquirer.prompt([needTag])
+  }
+
+  if (asw2 === null || asw2.isTag === false) {
     options += ' --no-git-tag-version'
   }
+
   const v = await command(`npm version ${options}`)
-  if (asw2.isTag === false) {
+  if (asw2 === null || asw2.isTag === false) {
     await command('git add .')
     await command(`git commit -m ${v.replace('v', '')}`)
   }
+
   const asw3 = await inquirer.prompt([needPush])
   if (asw3.isPush) {
     await command('git push')
