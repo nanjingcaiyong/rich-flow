@@ -57,31 +57,36 @@ program
 let options = process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
 
 async function main () {
-  let v = ''
+  let v = '', asw1 = {}, choices = ['major', 'minor', 'patch'];
+  const packageJson = readPackagejson()
+  const isMaster = await gitBranchIs('master')
   if (await hasLocalChanged()) {
     console.log(chalk.yellow('[Waring]: There are uncommitted codes'))
     return
   }
   // 如果没有指定版本，弹出交互命令
   if (process.argv.length < 3) {
-    const asw1 = await inquirer.prompt([version])
+    asw1 = await inquirer.prompt([version])
     options = asw1.option
   }
-
-  const isMaster = await gitBranchIs('master')
-
-  // 只有master分支打tag
-  if (!isMaster) {
+  if (isMaster) {
+    const tagList = await command('git tag -l')
+    const i = choices.findIndex(c => c == asw1.option);
+    const newVersion = packageJson.version.split('.')
+      .reduce((version, num, j) => {
+        num = Number(num)
+        if (j == i) ++num;
+        return  version += version ? `.${num}` : `v${num}`
+      }, '')
+    if (tagList.findIndex(tag => tag === newVersion) > -1) {
+      console.log(chalk.red(`Error: Tag v${packageJson.version} already exists`));
+      process.exit(0)
+    }
+  } else {  // 只有master分支打tag
     options += ' --no-git-tag-version'
   }
 
-  try {
-    v = await command(`npm version ${options}`) || '';
-  } catch (e) {
-    const packageJson = readPackagejson()
-    console.log(chalk.red(`Error: Tag v${packageJson.version} already exists`));
-    process.exit()
-  }
+  v = await command(`npm version ${options}`) || '';
   // 加上--no-git-tag-version后不打tag，也不会自动commit
   if (!isMaster) {
     await command('git add .')
