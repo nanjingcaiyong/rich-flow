@@ -4,7 +4,7 @@ const { program } = require('commander')
 const chalk = require('chalk')
 const { command, hasLocalChanged, gitBranchIs } = require('../lib/utils')
 const inquirer = require('inquirer')
-const { needTag, version } = require('../lib/questions')
+const { version } = require('../lib/questions')
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
@@ -54,9 +54,9 @@ program
   .on('exit', console.log)
 
 let options = process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
-let asw2 = null
 
 async function main () {
+  let v = ''
   if (await hasLocalChanged()) {
     console.log(chalk.yellow('[Waring]: There are uncommitted codes'))
     return
@@ -67,19 +67,22 @@ async function main () {
     options = asw1.option
   }
 
-  // 是否需要推送代码
-  if (await gitBranchIs('master')) {
-    asw2 = await inquirer.prompt([needTag])
-  }
+  const isMaster = await gitBranchIs('master')
 
-  if (asw2 === null || asw2.isTag === false) {
+  // 只有master分支打tag
+  if (!isMaster) {
     options += ' --no-git-tag-version'
   }
 
-  const v = await command(`npm version ${options}`)
-  if (asw2 === null || asw2.isTag === false) {
+  try {
+    v = await command(`npm version ${options}`) || ''
+  } catch (e) {
+    process.exit()
+  }
+  // 加上--no-git-tag-version后不打tag，也不会自动commit
+  if (!isMaster) {
     await command('git add .')
-    await command(`git commit -m ${v.replace('v', '')}`)
+    await command(`git commit -m ${v.replace('v', '')}`) // 要和自动提交内容一致，不含v，eg(0.0.14)
   }
 
   await command('git push')
