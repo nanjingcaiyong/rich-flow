@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.11](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.10...v0.1.11) (2023-01-05)
+
+
+### Bug Fixes
+
+* release ([0f7a786](https://github.com/nanjingcaiyong/rich-workflow/commit/0f7a786a0078c9b4658dc1737502d30498811c4e))
+
 ### [0.1.10](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.9...v0.1.10) (2023-01-05)
 
 
