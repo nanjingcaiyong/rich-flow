@@ -2,9 +2,10 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command, hasLocalChanged, gitBranchIs } = require('../lib/utils')
+const { command, hasLocalChanged, gitBranchIs, readPackagejson } = require('../lib/utils')
 const inquirer = require('inquirer')
 const { version } = require('../lib/questions')
+
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
@@ -75,8 +76,10 @@ async function main () {
   }
 
   try {
-    v = await command(`npm version ${options}`) || ''
+    v = await command(`npm version ${options}`) || '';
   } catch (e) {
+    const packageJson = readPackagejson()
+    console.log(chalk.red(`Error: Tag v${packageJson.version} already exists`));
     process.exit()
   }
   // 加上--no-git-tag-version后不打tag，也不会自动commit
