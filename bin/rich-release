@@ -4,7 +4,7 @@ const { program } = require('commander')
 const chalk = require('chalk')
 const { command, hasLocalChanged, gitBranchIs } = require('../lib/utils')
 const inquirer = require('inquirer')
-const { needPush, needTag, version } = require('../lib/questions')
+const { needTag, version } = require('../lib/questions')
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
@@ -82,10 +82,7 @@ async function main () {
     await command(`git commit -m ${v.replace('v', '')}`)
   }
 
-  const asw3 = await inquirer.prompt([needPush])
-  if (asw3.isPush) {
-    await command('git push')
-  }
+  await command('git push')
 }
 
 main()
