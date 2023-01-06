@@ -72,6 +72,7 @@ async function main () {
   if (isMaster) {
     const tagList = await command('git tag -l')
     const i = choices.findIndex(c => c == asw1.option);
+
     const newVersion = packageJson.version.split('.')
       .reduce((version, num, j) => {
         num = Number(num)
@@ -79,7 +80,7 @@ async function main () {
         return  version += version ? `.${num}` : `v${num}`
       }, '')
     if (tagList.findIndex(tag => tag === newVersion) > -1) {
-      console.log(chalk.red(`Error: Tag v${packageJson.version} already exists`));
+      console.log(chalk.red(`Error: Tag ${newVersion} already exists`));
       process.exit(0)
     }
   } else {  // 只有master分支打tag
@@ -87,13 +88,14 @@ async function main () {
   }
 
   v = await command(`npm version ${options}`) || '';
+
   // 加上--no-git-tag-version后不打tag，也不会自动commit
   if (!isMaster) {
     await command('git add .')
     await command(`git commit -m ${v.replace('v', '')}`) // 要和自动提交内容一致，不含v，eg(0.0.14)
   }
 
-  await command('git push')
+  // await command('git push')
 }
 
 main()
