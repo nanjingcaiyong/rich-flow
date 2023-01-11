@@ -3,8 +3,7 @@
 const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const inquirer = require('inquirer');
-const { readFile } = require('../lib/utils.js');
+const { readFile, askQuestions } = require('../lib/utils.js');
 
 program
   .name('rich')
@@ -37,7 +36,7 @@ async function run() {
     let index = -1, answer = {}
     while(++index < scripts.length) {
       if (Array.isArray(scripts[index])) {
-        answer[index] = (await inquirer.prompt([{
+        answer[index] = (await askQuestions([{
           name: 'option',
           type: 'list',
           message: scripts[index][0],

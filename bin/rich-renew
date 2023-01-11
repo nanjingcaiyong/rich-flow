@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-const shell = require('shelljs');
 const { program } = require('commander');
-const { gitBranchIs, hasLocalChanged, command, oraPromise } = require('../lib/utils.js')
+const { gitBranchIs, hasLocalChanged, command, oraPromise, queryLocalBranches, queryRemoteBranches } = require('../lib/utils.js')
 const chalk = require('chalk')
 
 
@@ -30,35 +29,43 @@ help()
 
 let branches = program.args || []
 
-const updateBranch = (branchName) => {
-  shell.exec(`git branch -D ${branchName} && git push origin -d ${branchName}`)
-  shell.exec(`git branch ${branchName} && git push origin -u ${branchName}`)
+const createBranch = async (branchName) => {
+  await command(`git branch ${branchName} && git push origin -u ${branchName}`)
 }
 
-const updateCode = () => {
-  shell.exec('git pull')
-}
-
-const switchBranch = (branchName) => {
-  shell.exec(`git switch ${branchName}`)
+/**
+ * @description 取交集
+ * @param l1 数组1
+ * @param l2 数组2
+ * @returns 
+ */
+function mixed (l1,l2) {
+  return l1.filter(t => l2.includes(t))
 }
 
 async function run() {
+  const localBranchList = await queryLocalBranches()
+  const remoteBranchList = await queryRemoteBranches()
   // 本地是否有修改，如果有则暂存
   if (await hasLocalChanged()) {
-    console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
+    console.log(chalk.green('Files that have been modified but not submitted locally have been staged locally for you'))
     await oraPromise(async () => {
       await command('rm -rf .git/index.lock')
       await command('git add .')
       await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
-    }, {text: '暂存代码'})
+    }, {text: 'Stash code'})
   }
   const isMasterBranch = await gitBranchIs('master')
   if (isMasterBranch) {
-    updateCode()
-    branches.forEach(updateBranch)
+    await command('git pull')
+    // 删除本地分支
+    await oraPromise(() => Promise.all(mixed(localBranchList, branches).map(name => command(`git branch -D ${name}`))), {text: 'Delete local branch'})
+    // 删除远程分支
+    await oraPromise(() => Promise.all(mixed(remoteBranchList, branches).map(name => command(`git push origin -d ${name}`))), {text: 'Delete remote branch'})
+    // 创建本地和远程分支
+    await oraPromise(() => Promise.all(branches.map(createBranch)), {text: 'Create branch'})
   } else {
-    switchBranch('master')
+    await command('git switch master')
     run()
   }
 }

@@ -2,8 +2,7 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command, hasLocalChanged, gitBranchIs, readPackagejson } = require('../lib/utils')
-const inquirer = require('inquirer')
+const { command, hasLocalChanged, gitBranchIs, readPackagejson, askQuestions } = require('../lib/utils')
 const { version } = require('../lib/questions')
 
 program
@@ -66,7 +65,7 @@ async function main () {
   }
   // 如果没有指定版本，弹出交互命令
   if (process.argv.length < 3) {
-    asw1 = await inquirer.prompt([version])
+    asw1 = await askQuestions([version])
     options = asw1.option
   }
   if (isMaster) {
