@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const { program } = require('commander');
-const shell = require('shelljs');
 const chalk = require('chalk');
 const { hasLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils')
 
@@ -27,7 +26,7 @@ let branchName = program.args[0];
 async function run () {
   const hasChange = await hasLocalChanged()
   if (hasChange) {
-    console.log('there are uncommitted codes')
+    console.log('There are uncommitted codes')
     return;
   }
   try {
@@ -36,13 +35,16 @@ async function run () {
   } catch (err) {
     return
   }
+    // 当前是否是master分支
+  const isMasterBranch = await gitBranchIs('master')
+  if (!isMasterBranch) process.exit(0)
+  // 当前合入的分支是否是远程分支
   const isRemote = await isRemoteBranch(branchName)
-  gitBranchIs('master').then((isMasterBranch) => {
-   // 如果合并的是 master 并且 是远程分支，才会删除
-   if (isMasterBranch && isRemote) {
-    shell.exec(`git push origin -d ${branchName}`)
+  if (!isRemote) process.exit(0)
+  if (isMasterBranch && isRemote) {
+    await command(`git push origin -d ${branchName}`)
+    console.log(chalk.green(`Deleted remote branch named ${branchName}`))
    }
- })
 }
 
 run()

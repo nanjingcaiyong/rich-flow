@@ -1,7 +1,16 @@
 #!/usr/bin/env node
 const { program } = require('commander');
 const chalk = require('chalk');
-const { command, askQuestions, hasLocalChanged, oraPromise, gitBranchIs, isRemoteBranch, exec } = require('../lib/utils.js')
+const { branchType } = require('../lib/questions')
+const { 
+  command, 
+  askQuestions, 
+  hasLocalChanged, 
+  oraPromise, 
+  gitBranchIs, 
+  isRemoteBranch, 
+  exec 
+} = require('../lib/utils.js')
 
 program
   .name('rich')
@@ -13,13 +22,13 @@ program
     console.log('  Examples:')
     console.log()
     console.log(chalk.gray('    # create git\'s new branch'))
-    console.log('    $ rich branch feat/f1')
-    console.log()
-    console.log(chalk.gray('    # delete git\'s branch'))
-    console.log('    $ rich branch -d feat/f1')
+    console.log('    $ rich branch f1')
     console.log()
     console.log(chalk.gray('    # search git\'s branch'))
-    console.log('    $ rich branch -s f1')
+    console.log('    $ rich branch -s feat')
+    console.log()
+    console.log(chalk.gray('    # delete git\'s branch'))
+    console.log('    $ rich branch -d f1')
     console.log()
   })
   .on('exit', console.log)
@@ -31,30 +40,18 @@ function help () {
 
 help()
 
+
+
 const options = program.opts();  // 定义的option
 
 let branchName = program.args[0]; // 分支名称
-
-
-/**
- * @description 询问分支类型
- * @returns {  }
- */
-function askBranchType () {
-  return askQuestions([{
-    type: 'list',
-    choices: ['fix', 'feat', 'ued', 'ci'],
-    message: 'please select the branch type to be created',
-    name: 'type'
-  }])
-}
 
 /**
  * @description 创建新分支
  * @param { branchName: string } 分支名称
  */
 async function createBranch (branchName) {
-  const answer = await askBranchType()
+  const answer = await askQuestions([branchType])
   let newBranchName = `${answer.type}/${branchName}`
   let promise = options.branch ? command(`git checkout -b ${newBranchName}`) : command(`git branch ${newBranchName}`)
   return promise.then(() => newBranchName).catch(() => { throw newBranchName })
@@ -65,7 +62,7 @@ async function createBranch (branchName) {
  * @param { branchName: string } 分支名称
  */
 async function deleteBranch (branchName) {
-  const answer = await askBranchType()
+  const answer = await askQuestions([branchType])
   let newBranchName = `${answer.type}/${branchName}`
   return command(`git branch -D ${newBranchName}`)
     .catch(() => {
@@ -143,7 +140,7 @@ function onSearch (keyword) {
 
 /**
  * @description 分支操作责任链链
- * @param branchName 
+ * @param branchName 分支名称
  * @param handlers 
  */
 async function chain (branchName, handlers) {

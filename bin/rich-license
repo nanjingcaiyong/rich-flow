@@ -3,7 +3,7 @@
 const { program } = require('commander')
 const fs = require('fs')
 const path = require('path')
-const inquirer = require('inquirer')
+const { askQuestions } = require('../lib/utils')
 const spdxLicenseList = require('spdx-license-list/full');
 const { liscense } = require('../lib/questions')
 const chalk = require('chalk')
@@ -23,13 +23,15 @@ program
   .on('exit', console.log)
   .parse(process.argv)
 
+
+console.log(program.opts(), program.args)
 function help () {
   if (program.args.length < 2) return program.help()
 }
 help()
 
 async function main () {
-  const answer = await inquirer.prompt([liscense])
+  const answer = await askQuestions([liscense])
   const content = spdxLicenseList[answer.option].licenseText
     .replace(/<year>/g, program.args[0])
     .replace(/<copyright holders>/g, program.args[1])

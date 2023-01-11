@@ -2,8 +2,9 @@
 
 const { program } = require('commander');
 const chalk = require('chalk');
-const inquirer = require('inquirer');
-const { command, hasLocalChanged, resolve, exists, mkdir, touch, stringFormat, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
+const { askQuestions } = require('../lib/utils')
+const { packageType } = require('../lib/questions')
+const { command, hasLocalChanged, resolve, exists, mkdir, touch, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
 // 默认的vscode配置
 const SETTINGS_CONFIG = require('../.vscode/settings.json')
 // 需要删除的文件
@@ -133,7 +134,7 @@ class FileOperator {
    * @param ignoreRegs 
    */
    static createGitIgnore = (ignoreRegs) => {
-    return touch('.gitignore', stringFormat(ignoreRegs))
+    return touch('.gitignore', jsonFormat(ignoreRegs))
   }
 
   /**
@@ -203,13 +204,7 @@ class CommandOperator {
    * @param { installers: Object } 安装器 
    */
   async init (installers) {
-    let answer = await inquirer.prompt([{
-      name: 'packtool',
-      type: 'list',
-      message: '请选择包管理器',
-      choices: ['npm', 'yarn', 'pnpm'],
-      default: 0
-    }])
+    let answer = await askQuestions([packageType])
     this.packageCommand = installers[answer.packtool]
   }
   /**
@@ -251,7 +246,8 @@ class CommandOperator {
    * @param { msg: string } 提交的message 
    */
   static async commit (msg) {
-    await command(`git commit -am "${msg}"`)
+    await command('git add .')
+    await command(`git commit -m "${msg}"`)
   }
 }
 
@@ -288,7 +284,7 @@ const main = async () => {
 
   // 如果没有初始化 npm 和 git，初始化完后必须进行一次提交。否则执行 git stash 会报错：您尚未建立初始提交
   if (isNotInitNpm || isNotInitGit) {
-    await CommandOperator.commit('初始化 git 和 npm')
+    await CommandOperator.commit('init git and npm')
   }
   // 本地是否有修改，如果有则暂存
   if (await hasLocalChanged()) {

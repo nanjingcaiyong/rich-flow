@@ -2,34 +2,32 @@
 const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const { isRemoteBranch, gitBranchIs } = require('../lib/utils.js')
+const { isRemoteBranch, gitBranchIs, command } = require('../lib/utils.js')
 
 program
   .name('rich')
-  .usage('push')
+  .usage('push <remote>')
   .on('--help', () => {
     console.log()
     console.log(chalk.gray('    # git push to remote'))
-    console.log('    $ rich push')
+    console.log('    $ rich push origin')
     console.log()
   })
-
-function help () {
-  if (program.args.length < 1) return program.help()
-}
-
-help()
+  .on('exit', console.log)
+  .parse(process.argv)
 
 const remoteName = program.args[0]
 
-process.on('exit', () => {
-  console.log()
-})
-
+function help () {
+  if (program.args.length < 1) return program.help()
+ }
+ 
+ help()
 
 async function run() {
   const localName = await gitBranchIs()
   const isRemote = await isRemoteBranch(localName) 
+  console.log(localName, isRemote, remoteName, await command('git remote -v'))
   if (!isRemote && remoteName) {
     shell.exec(`git push ${remoteName} -u ${localName}`)
   } else {

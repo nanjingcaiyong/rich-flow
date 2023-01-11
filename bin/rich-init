@@ -8,12 +8,12 @@ const ora = require('ora')
 const home = require('user-home')
 const tildify = require('tildify')
 const chalk = require('chalk')
-const inquirer = require('inquirer')
 const rm = require('rimraf').sync
 const logger = require('../lib/logger')
 const generate = require('../lib/generate')
 const checkVersion = require('../lib/check-version')
 const localPath = require('../lib/local-path')
+const { askQuestions } = require('../lib/utils')
 
 const isLocalPath = localPath.isLocalPath
 const getTemplatePath = localPath.getTemplatePath
@@ -105,7 +105,7 @@ function main () {
 }
 
 if (inPlace || exists(to)) {
-  inquirer.prompt([{
+  askQuestions([{
     type: 'confirm',
     message: inPlace
       ? 'Generate project in current directory?'

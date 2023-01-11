@@ -6,7 +6,7 @@ const chalk = require('chalk')
 
 program
   .name('rich')
-  .usage('lint:es [path...]')
+  .usage('lint:es [file] [dir]')
   .on('--help', () => {
     console.log('  Examples:')
     console.log()
@@ -20,15 +20,17 @@ program
 
 const options = program.opts();
 
-const pathes = process.argv.slice(2).filter(t=> !/^-+./.test(t))
+let pathes = process.argv.slice(2).filter(t=> !/^-+./.test(t))
+pathes = pathes.length ? pathes : ['.']
 
 function main () {
   let baseShell = `npx eslint --ext .js,.vue,.ts`
   if (options.fix) baseShell += ' --fix';
   
   baseShell += pathes.reduce((s, p) => s += ` ${p}`, '')
-  
+
   oraPromise(command.bind(null, baseShell), {text: 'lint code'})
+    .catch(console.log)
 }
 
 main()
