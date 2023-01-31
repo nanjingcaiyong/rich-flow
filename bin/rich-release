@@ -2,9 +2,9 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command, hasLocalChanged, gitBranchIs, readPackagejson, askQuestions } = require('../lib/utils')
+const { command, hasLocalChanged, gitBranchIs, askQuestions, readPackagejson } = require('../lib/utils')
 const { version } = require('../lib/questions')
-
+const path = require('path')
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
@@ -53,52 +53,81 @@ program
   })
   .on('exit', console.log)
 
-let options = process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
+/**
+ * @description 通过命令行参数形式升级版本
+ * @returns 
+ */
+function updateByParams () {
+  return process.argv.slice(2).reduce((t, k) => t+= ` ${k}`, '')
+}
 
-async function main () {
-  let v = '', asw1 = {}, choices = ['major', 'minor', 'patch'];
-  const packageJson = readPackagejson()
-  const isMaster = await gitBranchIs('master')
+/**
+ * @description 通过命令行交互形式升级版本
+ * @returns 
+ */
+async function updateByInquirer () {
+  const ans = await askQuestions([version])
+  return ans.option
+}
+
+/**
+ * @description 是否通过命令行参数形式表示指定版本
+ * @returns 
+ */
+function isManual () {
+  return process.argv.slice(2).length > 0
+}
+
+async function generateLocalVersion () {
+  let newVersion = '';
   if (await hasLocalChanged()) {
-    console.log(chalk.yellow('[Waring]: There are uncommitted codes'))
+    console.log(chalk.yellow('[Waring]: There are uncommitted codes'));
     return
   }
-  // 如果没有指定版本，弹出交互命令
-  if (process.argv.length < 3) {
-    asw1 = await askQuestions([version])
-    options = asw1.option
+
+  let options = isManual() ? updateByParams() : await updateByInquirer();
+  try {
+    newVersion = (await command(`npm version ${options} --allow-same-version`) || '').replace('v', '');
+  } catch (err) {
+    console.error(err)
   }
-  if (isMaster) {
-    const tagList = await command('git tag -l')
-    const i = choices.findIndex(c => c == asw1.option);
+  return newVersion
+}
 
-    const newVersion = packageJson.version.split('.')
-      .reduce((version, num, j) => {
-        num = Number(num)
-        if (j == i) ++num;
-        return  version += version ? `.${num}` : `v${num}`
-      }, '')
-    if (tagList.findIndex(tag => tag === newVersion) > -1) {
-      console.log(chalk.red(`Error: Tag ${newVersion} already exists`));
-      process.exit(0)
-    }
-  } else {  // 只有master分支打tag
-    options += ' --no-git-tag-version'
+/**
+ * @description 关联项目命令
+ * @param path 关联项目地址
+ * @returns 
+ */
+function exec (path) {
+  return (script) => command(script, { cwd: path })
+}
+
+/**
+ * @description 同步关联项目版本号
+ * @param version 同步的版本号
+ */
+async function generateRelatedVersion (version, dir) {
+  const absolutePath = path.resolve(process.cwd(), '../' + dir)
+  const cmd = exec(absolutePath)
+  if (await hasLocalChanged()) {
+    await cmd(`git stash save 'saved by version:${version}'`)
   }
-
-  v = await command(`npm version ${options}`) || '';
-
-  // 加上--no-git-tag-version后不打tag，也不会自动commit
-  if (!isMaster) {
-    await command('git add .')
-    await command(`git commit -m ${v.replace('v', '')}`) // 要和自动提交内容一致，不含v，eg(0.0.14)
+  if (!await gitBranchIs('master', { cwd:  absolutePath})) {
+    await cmd('git switch master')
   }
+  await cmd(`npm version ${version} --allow-same-version`) || '';
+}
 
-  // await command('git push')
+async function main () {
+  const dir = readPackagejson().relatedItem; // 关联的项目路径
+  const newVersion = await generateLocalVersion()
+  if (dir) {
+    generateRelatedVersion(newVersion, dir)
+  }
 }
 
 main()
-
 
 
 
