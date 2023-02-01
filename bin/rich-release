@@ -2,9 +2,10 @@
 
 const { program } = require('commander')
 const chalk = require('chalk')
-const { command, hasLocalChanged, gitBranchIs, askQuestions, readPackagejson } = require('../lib/utils')
+const { command, hasLocalChanged, gitBranchIs, askQuestions, readPackagejson, oraPromise } = require('../lib/utils')
 const { version } = require('../lib/questions')
 const path = require('path')
+const { success, warn } = require('../lib/log.js')
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
@@ -78,18 +79,32 @@ function isManual () {
   return process.argv.slice(2).length > 0
 }
 
+/**
+ * @description 退出
+ */
+function exit () {
+  process.exit(0)
+}
+
+/**
+ * @description 当前项目升级版本号
+ * @returns 
+ */
 async function generateLocalVersion () {
   let newVersion = '';
+  // 有本地修改则退出
   if (await hasLocalChanged()) {
-    console.log(chalk.yellow('[Waring]: There are uncommitted codes'));
-    return
+    warn('There are uncommitted codes')
+    exit()
   }
 
   let options = isManual() ? updateByParams() : await updateByInquirer();
   try {
-    newVersion = (await command(`npm version ${options} --allow-same-version`) || '').replace('v', '');
+    newVersion = await oraPromise(command.bind(null, `npm version ${options} --allow-same-version`),  { text: 'upgrade current item' })
+    newVersion = newVersion.replace('v', '');
   } catch (err) {
     console.error(err)
+    exit()
   }
   return newVersion
 }
@@ -110,21 +125,29 @@ function exec (path) {
 async function generateRelatedVersion (version, dir) {
   const absolutePath = path.resolve(process.cwd(), '../' + dir)
   const cmd = exec(absolutePath)
+  // 如果本地有文件修改，则暂存本地
   if (await hasLocalChanged()) {
     await cmd(`git stash save 'saved by version:${version}'`)
   }
-  if (!await gitBranchIs('master', { cwd:  absolutePath})) {
+  // 切换到master分支
+  if (!await gitBranchIs('master', { cwd:  absolutePath })) {
     await cmd('git switch master')
   }
   await cmd(`npm version ${version} --allow-same-version`) || '';
 }
 
 async function main () {
-  const dir = readPackagejson().relatedItem; // 关联的项目路径
-  const newVersion = await generateLocalVersion()
-  if (dir) {
-    generateRelatedVersion(newVersion, dir)
-  }
+  let items = readPackagejson().relatedItems; // 关联的项目路径, 可以是
+
+  items = Array.isArray(items) ? items : [items]
+  const newVersion = await generateLocalVersion();
+
+  await Promise.all(items.map(dir => oraPromise(
+    generateRelatedVersion.bind(null, newVersion, dir), 
+    { text: `upgrade ${dir}`}
+  )))
+
+  success(`version upgrade to ${newVersion}`)
 }
 
 main()
