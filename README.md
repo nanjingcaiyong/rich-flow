@@ -45,7 +45,7 @@ rich run build
 
 #### 项目版本升级
 ```sh
-rich release [版本号]·
+rich release [版本号]
 ```
 项目版本号升级支持主从，在主项目中执行 rich release 后生成的新版本号同步到一个或多个从项目。主项目需在package.json中配置从项目，目前主从项目必须位于同一目录
 ```json
