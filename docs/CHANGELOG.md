@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.16](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.14...v0.1.16) (2023-02-07)
+
+
+### Features
+
+* 升级主从项目版本 ([80a2c22](https://github.com/nanjingcaiyong/rich-workflow/commit/80a2c22019f9a0b96d97914b8a09a177789982f0))
+* release 配置关联项目 ([11a7d1c](https://github.com/nanjingcaiyong/rich-workflow/commit/11a7d1c696e19bdb11e9e868fe869409616471cd))
+
+
+### Bug Fixes
+
+* 修复缺失relatedItems报错 ([991f4ce](https://github.com/nanjingcaiyong/rich-workflow/commit/991f4ce2531e4e8cfae930b169492e8bb0be152e))
+
 ### [0.1.15](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.14...v0.1.15) (2023-02-01)
 
 
