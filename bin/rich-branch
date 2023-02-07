@@ -61,12 +61,11 @@ async function createBranch (branchName) {
  * @description 删除分支
  * @param { branchName: string } 分支名称
  */
-async function deleteBranch (branchName) {
-  const answer = await askQuestions([branchType])
-  let newBranchName = `${answer.type}/${branchName}`
-  return command(`git branch -D ${newBranchName}`)
+async function deleteBranch () {
+  const str = program.args.reduce((str, name, index) => str += `${index > 0 ? '|' : ''}${name}`, '')
+  return command(`git branch -a | grep -E '${str}' | xargs git branch -D`)
     .catch(() => {
-      console.log(chalk.red(`Failed to delete. There is no branch named '${newBranchName}'`))
+      console.log(chalk.red(`Failed to delete. There is no branch named '${str}'`))
     })
 }
 
