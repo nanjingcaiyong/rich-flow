@@ -17,6 +17,7 @@ program
   .usage('branch <branch-name>')
   .option('-d, --delete',  'delete branch')
   .option('-b, --branch',  'create branch and switch')
+  .option('-desc, --description', 'create branch description')
   .option('-s, --search',  'search branch')
   .on('--help', () => {
     console.log('  Examples:')
@@ -34,27 +35,23 @@ program
   .on('exit', console.log)
   .parse(process.argv)
 
-function help () {
-  if (program.args.length < 1) return program.help()
-}
-
-help()
-
-
-
 const options = program.opts();  // 定义的option
 
 let branchName = program.args[0]; // 分支名称
+let description =  program.args[1]
 
 /**
  * @description 创建新分支
  * @param { branchName: string } 分支名称
  */
 async function createBranch (branchName) {
-  const answer = await askQuestions([branchType])
-  let newBranchName = `${answer.type}/${branchName}`
-  let promise = options.branch ? command(`git checkout -b ${newBranchName}`) : command(`git branch ${newBranchName}`)
-  return promise.then(() => newBranchName).catch(() => { throw newBranchName })
+  const answer = await askQuestions([branchType]);
+  let newBranchName = `${answer.type}/${branchName}`;
+  let stack = [command(`git checkout ${options.branch ? '-b' : ''} ${newBranchName}`)]
+  if (options.description) {
+    stack.push(setBranchDescription(newBranchName, description))
+  }
+  return Promise.all(stack).then(() => newBranchName).catch(() => { throw newBranchName });
 }
 
 /**
@@ -67,6 +64,27 @@ async function deleteBranch () {
     .catch(() => {
       console.log(chalk.red(`Failed to delete. There is no branch named '${str}'`))
     })
+}
+
+/**
+ * @description 为分支设置备注
+ * @param {string} branchName 分支名称
+ * @param {string} description 备注
+ * @returns 
+ */
+function setBranchDescription (branchName, description) {
+  console.log(`git config branch.${branchName}.description "${description}"`)
+  return command(`git config branch.${branchName}.description "${description}"`)
+}
+
+/**
+ * @description 通过分支名获取备注
+ * @param {string} 分支名
+ */
+async function getDescriptionByBranch (branch) {
+  const branchName = /(?!(\*|\s)).+/.exec(branch)[0]
+  const description = await command(`git config branch.${branchName}.description`).catch(() => '')
+  return description ? `${branch}: ${description}` : branch
 }
 
 /**
@@ -94,6 +112,31 @@ async function pullCode () {
   }
 }
 
+function searchWithDescription (keyword = '') {
+  return exec(`git branch | grep '${keyword}'`)
+    .then(async res => {
+      const str = res.stdout.trim()
+      const branches = str.split(/(?:\n|$)(?:\s)*/)
+      if (branches.length === 1 && options.description) {
+        await setBranchDescription(branches[0], description)
+      }
+      const stack = branches.reduce((list, name) => [...list, getDescriptionByBranch(name)], [])
+
+      Promise.all(stack).then(res => {
+        res.forEach(t => { 
+          if (t.indexOf('*') !== -1) {
+            console.log(chalk.green(t))
+          } else {
+            console.log(`  ${t}`)
+          }
+         })
+      })
+
+    }).catch(() => {
+      console.log(chalk.red('Unmatched'))
+    })
+}
+
 /**
  * @description 删除分支
  * @param branchName 分支名称
@@ -112,6 +155,7 @@ async function onDelete (branchName) {
  * @returns 
  */
  function onCreate (branchName) {
+  if (!options.branch) return 'next'
   return createBranch(branchName)
     .then((newBranchName) => {
       console.log(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
@@ -126,16 +170,15 @@ async function onDelete (branchName) {
  * @param keyword 分支关键字
  * @returns 
  */
-function onSearch (keyword) {
+function onSearch (keyword='') {
   if (!options.search) return 'next'
-  return exec(`git branch | grep ${keyword}`)
-    .then(res => {
-      console.log(chalk.green(res.stdout))
-    }).catch(() => {
-      console.log(chalk.red('Unmatched'))
-    })
+  return searchWithDescription(keyword)
 }
 
+
+function onBranch () {
+  return searchWithDescription()
+}
 
 /**
  * @description 分支操作责任链链
@@ -152,7 +195,7 @@ async function chain (branchName, handlers) {
 }
 
 async function main () {
-  await chain(branchName, [onDelete, onSearch, onCreate])
+  await chain(branchName, [onDelete, onSearch, onCreate, onBranch])
 }
 
 main()

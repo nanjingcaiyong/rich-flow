@@ -57,7 +57,7 @@ program
 
 /**
  * @description 通过命令行参数形式升级版本
- * @returns 
+ * @returns { string } 合并的命令后缀
  */
 function updateByParams () {
   return program.args.reduce((t, k) => t+= ` ${k}`, '')
@@ -65,7 +65,7 @@ function updateByParams () {
 
 /**
  * @description 通过命令行交互形式升级版本
- * @returns 
+ * @returns { string }
  */
 async function updateByInquirer () {
   const ans = await askQuestions([version])
@@ -74,7 +74,7 @@ async function updateByInquirer () {
 
 /**
  * @description 是否通过命令行参数形式表示指定版本
- * @returns 
+ * @returns { boolean }
  */
 function isManual () {
   return program.args.length > 0
@@ -138,10 +138,7 @@ async function generateRelatedVersion (version, dir) {
 }
 
 async function main () {
-
   const newVersion = await generateLocalVersion();
-
-
   let items = readPackagejson().relatedItems; // 关联的项目路径, 可以是
   if (items) {
     items = Array.isArray(items) ? items : [items]

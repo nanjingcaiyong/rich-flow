@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 const { program } = require('commander');
 const chalk = require('chalk');
-const { hasLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils')
+const { warn } = require('../lib/log.js')
+const { hasLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils');
 
 program
   .name('rich')
@@ -24,27 +25,23 @@ help()
 let branchName = program.args[0];
 
 async function run () {
-  const hasChange = await hasLocalChanged()
-  if (hasChange) {
-    console.log('There are uncommitted codes')
-    return;
+  const [isChange, isRemote, currentBranch] = await Promise.all([hasLocalChanged(), isRemoteBranch(branchName), gitBranchIs()])
+  // 如果有本地修改，警告
+  if (isChange) {
+    warn('There are uncommitted codes')
+    process.exit(0)
   }
   try {
     // 默认git merge 采用 fast-forward
-    command(`git merge ${branchName} --squash`)
+    await command(`git merge ${branchName} --squash`)
+    await command(`git commit -am "Merge branch '${branchName}' into ${currentBranch}"`)
+    await command(`git branch -d ${branchName}`)
+    if (isRemote) {
+      await command(`git push origin -d ${branchName}`)
+    }
   } catch (err) {
-    return
+    //
   }
-    // 当前是否是master分支
-  const isMasterBranch = await gitBranchIs('master')
-  if (!isMasterBranch) process.exit(0)
-  // 当前合入的分支是否是远程分支
-  const isRemote = await isRemoteBranch(branchName)
-  if (!isRemote) process.exit(0)
-  if (isMasterBranch && isRemote) {
-    await command(`git push origin -d ${branchName}`)
-    console.log(chalk.green(`Deleted remote branch named ${branchName}`))
-   }
 }
 
 run()
