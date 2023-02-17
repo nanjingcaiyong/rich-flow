@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.17](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.16...v0.1.17) (2023-02-17)
+
+
+### Features
+
+* 添加branch 备注功能 ([0b73ea1](https://github.com/nanjingcaiyong/rich-workflow/commit/0b73ea1a8c34d041d748d593d5b86d8ba90c173e))
+
 ### [0.1.16](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.14...v0.1.16) (2023-02-07)
 
 
