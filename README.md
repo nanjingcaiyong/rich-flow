@@ -71,6 +71,9 @@ rich run lint:style  [<文件地址>...] [<路径>...] [--fix]
 
 #### branch: 分支相关操作
 ```sh
+# 查看分支（带备注）
+rich branch
+
 # 创建分支
 rich branch [-b] <分支名>
 
@@ -79,6 +82,9 @@ rich branch -d <分支名>
 
 # 关键词匹配所有分支
 rich branch -s <关键词>
+
+# 给分支做备注
+rich branch -b <分支名> -desc <message>
 ```
 #### renew: 远程更新分支
 ```sh
