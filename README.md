@@ -83,6 +83,9 @@ rich branch -d <分支名>
 # 关键词匹配所有分支
 rich branch -s <关键词>
 
+# 设置或修改分支的备注
+rich branch -s <分支名> -desc <message>
+
 # 给分支做备注
 rich branch -b <分支名> -desc <message>
 ```

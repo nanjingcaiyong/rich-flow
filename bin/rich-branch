@@ -112,13 +112,17 @@ async function pullCode () {
   }
 }
 
+function delCurrentBranchPrefix (branchName) {
+  return branchName.replace(/\*\s/, '')
+}
+
 function searchWithDescription (keyword = '') {
   return exec(`git branch | grep '${keyword}'`)
     .then(async res => {
       const str = res.stdout.trim()
       const branches = str.split(/(?:\n|$)(?:\s)*/)
       if (branches.length === 1 && options.description) {
-        await setBranchDescription(branches[0], description)
+        await setBranchDescription(delCurrentBranchPrefix(branches[0]), description)
       }
       const stack = branches.reduce((list, name) => [...list, getDescriptionByBranch(name)], [])
 
