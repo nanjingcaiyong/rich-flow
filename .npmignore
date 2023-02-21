@@ -1,0 +1,6 @@
+.husky
+docs
+deploy.sh
+commitlint.config.cjs
+.lintstagedrc.json
+.eslintrc.js
