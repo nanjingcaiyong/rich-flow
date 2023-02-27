@@ -2,13 +2,12 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const { branchType } = require('../lib/questions')
+const { warn } = require('../lib/log')
 const { 
   command, 
   askQuestions, 
   hasLocalChanged, 
-  oraPromise, 
-  gitBranchIs, 
-  isRemoteBranch, 
+  oraPromise,
   exec 
 } = require('../lib/utils.js')
 
@@ -21,6 +20,12 @@ program
   .option('-s, --search',  'search branch')
   .on('--help', () => {
     console.log('  Examples:')
+    console.log()
+    console.log(chalk.gray('    # list git\'s branch'))
+    console.log('    $ rich branch')
+    console.log()
+    console.log(chalk.gray('    # change git\'s branch'))
+    console.log('    $ rich branch f1')
     console.log()
     console.log(chalk.gray('    # create git\'s new branch'))
     console.log('    $ rich branch -b f1')
@@ -41,10 +46,10 @@ program
   .on('exit', console.log)
   .parse(process.argv)
 
-const options = program.opts();  // 定义的option
+const options = program.opts();     // 定义的option
 
-let branchName = program.args[0]; // 分支名称
-let description = program.args[1]
+let branchName = program.args[0];   // 分支名称
+let description = program.args[1];  // 分支描述
 
 /**
  * @description 创建新分支
@@ -98,17 +103,13 @@ async function getDescriptionByBranch (branchName, isCurrentBranch) {
 async function stashCode () {
   // 本地是否有修改，如果有则暂存
   if (await hasLocalChanged()) {
-    console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
+    warn('There are uncommitted codes, local staging has been performed for you')
     await oraPromise(async () => {
       await command('rm -rf .git/index.lock')
       await command('git add .')
       await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
-    }, {text: '暂存代码'})
+    }, {text: 'Staging code'})
   }
-}
-
-function delCurrentBranchPrefix (branchName) {
-  return branchName.replace(/\*\s/, '')
 }
 
 /**
@@ -156,7 +157,7 @@ function searchWithDescription (keyword = '', withDescription = false) {
       const branchMap = getBranchNamesFromCommand(res.stdout)
       const branchNames = Object.keys(branchMap)
       if (branchNames.length === 1 && withDescription) {
-        await setBranchDescription(delCurrentBranchPrefix(branchNames[0]), description)
+        await setBranchDescription(branchNames[0], description)
       }
       const stack = branchNames.reduce((list, name) => list.concat(getDescriptionByBranch(name, branchMap[name])), [])
       const branchesWithDescription = await Promise.all(stack)
@@ -215,6 +216,15 @@ function onBranch () {
   return searchWithDescription('', true)
 }
 
+async function onChangeBranch () {
+  if (options.branch || branchName === undefined ) return 'next';
+  if (await hasLocalChanged()) {
+    await stashCode()
+  }
+  await command(`git checkout ${branchName}`)
+  await command(`git pull`)
+}
+
 /**
  * @description 分支操作责任链链
  * @param branchName 分支名称
@@ -230,7 +240,7 @@ async function chain (branchName, handlers) {
 }
 
 async function main () {
-  await chain(branchName, [onDelete, onSearch, onCreate, onBranch])
+  await chain(branchName, [onDelete, onSearch, onCreate, onChangeBranch, onBranch])
 }
 
 main()
