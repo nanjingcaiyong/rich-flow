@@ -107,16 +107,6 @@ async function stashCode () {
   }
 }
 
-/**
- * @description 拉取最新代码
- */
-async function pullCode () {
-  const currentBranchName = await gitBranchIs()
-  if (await isRemoteBranch(currentBranchName)) {
-    await command('git pull')
-  }
-}
-
 function delCurrentBranchPrefix (branchName) {
   return branchName.replace(/\*\s/, '')
 }
