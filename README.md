@@ -88,6 +88,9 @@ rich branch -s <分支名> -desc <message>
 
 # 给分支做备注
 rich branch -b <分支名> -desc <message>
+
+# 给分支做备注并赋链接
+rich branch -b <分支名> -desc <message> -l <url>
 ```
 #### renew: 远程更新分支
 ```sh

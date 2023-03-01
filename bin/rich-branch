@@ -8,7 +8,8 @@ const {
   askQuestions, 
   hasLocalChanged, 
   oraPromise,
-  exec 
+  exec,
+  terminalLink
 } = require('../lib/utils.js')
 
 program
@@ -18,6 +19,7 @@ program
   .option('-b, --branch',  'create branch and switch')
   .option('-desc, --description', 'create branch description')
   .option('-s, --search',  'search branch')
+  .option('-l, --link', 'description link')
   .on('--help', () => {
     console.log('  Examples:')
     console.log()
@@ -39,6 +41,9 @@ program
     console.log(chalk.gray('    # update git\'s branch description'))
     console.log('    $ rich branch -s f1 -desc "new description"')
     console.log()
+    console.log(chalk.gray('    # update git\'s branch description'))
+    console.log('    $ rich branch -s f1 -desc "new description" -l "https://github.com/"')
+    console.log()
     console.log(chalk.gray('    # delete git\'s branch'))
     console.log('    $ rich branch -d f1')
     console.log()
@@ -46,10 +51,17 @@ program
   .on('exit', console.log)
   .parse(process.argv)
 
-const options = program.opts();     // 定义的option
+const options = program.opts();               // 定义的option
 
-let branchName = program.args[0];   // 分支名称
-let description = program.args[1];  // 分支描述
+let branchName = program.args[0];             // 分支名称
+let description = program.args[1];            // 分支描述
+let link = program.args[2];        // 分支描述链接
+
+
+let descriptionWithLink = description
+if (options.description && options.link) {
+  descriptionWithLink = terminalLink(description, link)
+}
 
 /**
  * @description 创建新分支
@@ -60,7 +72,7 @@ async function createBranch (branchName) {
   let newBranchName = `${answer.type}/${branchName}`;
   let stack = [command(`git checkout ${options.branch ? '-b' : ''} ${newBranchName}`)]
   if (options.description) { // 如果用户执行
-    stack.push(setBranchDescription(newBranchName, description))
+    stack.push(setBranchDescription(newBranchName, descriptionWithLink))
   }
   return Promise.all(stack).then(() => newBranchName).catch(() => { throw newBranchName });
 }
@@ -84,7 +96,7 @@ async function deleteBranch () {
  * @returns 
  */
 function setBranchDescription (branchName, description) {
-  return command(`git config branch.${branchName}.description "${description}"`)
+  return command(`git config branch.${branchName}.description '${description}'`)
 }
 
 /**
@@ -96,6 +108,7 @@ async function getDescriptionByBranch (branchName, isCurrentBranch) {
   branchName = isCurrentBranch ? `* ${branchName}` : branchName
   return description ? `${branchName}: ${description}` : branchName
 }
+
 
 /**
  * @description 暂存本地修改
@@ -157,7 +170,7 @@ function searchWithDescription (keyword = '', withDescription = false) {
       const branchMap = getBranchNamesFromCommand(res.stdout)
       const branchNames = Object.keys(branchMap)
       if (branchNames.length === 1 && withDescription) {
-        await setBranchDescription(branchNames[0], description)
+        await setBranchDescription(branchNames[0], descriptionWithLink)
       }
       const stack = branchNames.reduce((list, name) => list.concat(getDescriptionByBranch(name, branchMap[name])), [])
       const branchesWithDescription = await Promise.all(stack)
