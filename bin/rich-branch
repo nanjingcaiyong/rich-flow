@@ -2,7 +2,7 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const { branchType } = require('../lib/questions')
-const { warn } = require('../lib/log')
+const { warn, success, error } = require('../lib/log')
 const { 
   command, 
   askQuestions, 
@@ -82,10 +82,13 @@ async function createBranch (branchName) {
  * @param { branchName: string } 分支名称
  */
 async function deleteBranch () {
-  const str = program.args.reduce((str, name, index) => str += `${index > 0 ? '|' : ''}${name}`, '')
-  return command(`git branch | grep -E '${str}' | xargs git branch -D`)
+  const str = program.args.reduce((str, name, index) => str += `${index > 0 ? ' ' : ''}${name}`, '')
+  return command(`git branch -d ${str}`)
+    .then(() => {
+      success(`Branch ${str.replace(/\s/g, '、')} deleted`)
+    })
     .catch(() => {
-      console.log(chalk.red(`Failed to delete. There is no branch named '${str}'`))
+     error(`Failed to delete. There is no branch named '${str}'`)
     })
 }
 
@@ -176,7 +179,7 @@ function searchWithDescription (keyword = '', withDescription = false) {
       const branchesWithDescription = await Promise.all(stack)
       print(branchesWithDescription)
     }).catch(() => {
-      console.log(chalk.red('Unmatched'))
+      error('Unmatched')
     })
 }
 
@@ -200,10 +203,10 @@ async function onDelete (branchName) {
   if (!options.branch) return 'next';
   return createBranch(branchName)
     .then((newBranchName) => {
-      console.log(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
+      success(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
     })
     .catch((newBranchName) => {
-      console.log(chalk.red(`Failed to create. A branch named '${newBranchName}' already exists`))
+      error(`Failed to create. A branch named '${newBranchName}' already exists`)
     })
 }
 
