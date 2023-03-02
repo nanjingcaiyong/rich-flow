@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.24](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.23...v0.1.24) (2023-03-02)
+
+
+### Bug Fixes
+
+* 修复删除分支逻辑 ([065795e](https://github.com/nanjingcaiyong/rich-workflow/commit/065795e449bfa3b9d0cba20785730e72b65bff8f))
+
 ### [0.1.23](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.22...v0.1.23) (2023-03-01)
 
 
