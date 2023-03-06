@@ -37,7 +37,7 @@ request({
   const requestBody = JSON.parse(body)
     .filter(t => t.topics.includes(GITHUB.topic))
   if (Array.isArray(requestBody)) {
-    console.log('  可用的项目模板如下: ')
+    console.log('  The available project templates are as follows: ')
     console.log()
     requestBody.length
       ? requestBody.forEach(repo => {
