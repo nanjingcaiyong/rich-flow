@@ -116,6 +116,11 @@ rich push
 rich ignore .DS_Store
 ```
 
+#### commit: 交互式commit信息生成，规范提交内容格式
+```sh
+rich commit
+```
+
 ## 3、安装插件
 
 ```sh
