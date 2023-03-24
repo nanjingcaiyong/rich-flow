@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.26](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.25...v0.1.26) (2023-03-24)
+
+
+### Features
+
+* 新增rich commit命令 ([b7e6931](https://github.com/nanjingcaiyong/rich-workflow/commit/b7e69319b8af35716a31e082c716046f91a41aa6))
+
 ### [0.1.25](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.24...v0.1.25) (2023-03-06)
 
 ### [0.1.24](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.23...v0.1.24) (2023-03-02)
