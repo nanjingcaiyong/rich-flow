@@ -18,4 +18,5 @@ program
   .command('ignore', 'ignore specified file')                                                // 忽略指定文件
   .command('release', 'upgrade version no')
   .command('license', 'generate license')
+  .command('commit', '代码提交')
   .parse(process.argv)

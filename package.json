@@ -17,7 +17,8 @@
     "rich-push": "bin/rich-push",
     "rich-ignore": "bin/rich-ignore",
     "rich-release": "bin/rich-release",
-    "rich-license": "bin/rich-license"
+    "rich-license": "bin/rich-license",
+    "rich-commit": "bin/rich-commit"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
