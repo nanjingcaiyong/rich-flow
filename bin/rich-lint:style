@@ -8,13 +8,13 @@ program
   .name('rich')
   .usage('lint:style [path...]')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # format style code'))
+    console.log(chalk.gray('    # 格式化代码'))
     console.log('    $ rich lint:style')
     console.log()
   })
-  .option('--fix', 'format code')
+  .option('--fix', '自动修复')
   .on('exit',console.log)
   .parse(process.argv)
 
@@ -32,7 +32,7 @@ function main () {
 
   if (options.fix) baseShell += ' --fix';
   
-  oraPromise(command.bind(null, baseShell), {text: 'lint code'})
+  oraPromise(command.bind(null, baseShell), {text: '格式化'})
 }
 
 main()

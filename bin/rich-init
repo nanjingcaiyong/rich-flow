@@ -21,16 +21,16 @@ const getTemplatePath = localPath.getTemplatePath
 program
   .name('rich')
   .usage('init <template-name> [project-name]')
-  .description('init project template')
-  .option('-c, --clone', 'use git clone')
-  .option('--offline', 'use local template')
+  .description('初始化项目模板')
+  .option('-c, --clone', '使用 git 克隆')
+  .option('--offline', '使用本地缓存模板')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # create a new project with an official template'))
+    console.log(chalk.gray('    # 使用模板创建新项目'))
     console.log('    $ rich init mpa my-project')
     console.log()
-    console.log(chalk.gray('    # create a new project straight from a github template'))
+    console.log(chalk.gray('    # 直接从github模板创建一个新项目'))
     console.log('    $ rich init username/repo my-project')
     console.log()
   })
@@ -54,7 +54,7 @@ const clone = options.clone || false
 
 const tmp = path.join(home, '.rich-templates', template.replace(/[\/:]/g, '-'))
 if (options.offline) {
-  console.log(`> Use cached template at ${chalk.yellow(tildify(tmp))}`)
+  console.log(`> 使用缓存模板 ${chalk.yellow(tildify(tmp))}`)
   template = tmp
 }
 
@@ -63,17 +63,17 @@ if (options.offline) {
  * @param {String} template
  */
  function downloadAndGenerate (template) {
-  const spinner = ora('downloading template')
+  const spinner = ora('下载模板')
   spinner.start()
   // 如果没有指定--offline，则会从远程下载并覆盖本地缓存的模版
   if (exists(tmp)) rm(tmp)
   download(template, tmp, { clone }, err => {
     spinner.stop()
-    if (err) logger.fatal('Failed to download repo ' + template + ': ' + err.message.trim())
+    if (err) logger.fatal('模板' + template + '下载失败: ' + err.message.trim())
     generate(name, tmp, to, err => {
       if (err) logger.fatal(err)
       console.log()
-      logger.success('Generated "%s".', name)
+      logger.success('生成 "%s".', name)
     })
   })
 }
@@ -86,10 +86,10 @@ function main () {
       generate(name, templatePath, to, err => {
         if (err) logger.fatal(err)
         console.log()
-        logger.success('Generated "%s".', name)
+        logger.success('生成 "%s".', name)
       })
     } else {
-      logger.fatal('Local template "%s" not found.', template)
+      logger.fatal('没找到 "%s" 的本地模板', template)
     }
   } else {
     checkVersion(() => {
@@ -108,8 +108,8 @@ if (inPlace || exists(to)) {
   askQuestions([{
     type: 'confirm',
     message: inPlace
-      ? 'Generate project in current directory?'
-      : 'Target directory exists. Continue?',
+      ? '是否在当前目录中生成项目？'
+      : '目标目录已存在。是否继续?',
     name: 'ok'
   }]).then(answers => {
     if (answers.ok) {

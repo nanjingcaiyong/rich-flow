@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const { askQuestions } = require('../lib/utils')
 const spdxLicenseList = require('spdx-license-list/full');
-const { liscense } = require('../lib/questions')
+const questions = require('../lib/questions')
 const chalk = require('chalk')
 
 program
@@ -14,24 +14,23 @@ program
   .option('-y, --year', 'copyright')
   .option('-h, --holder', 'holders')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # create license file'))
+    console.log(chalk.gray('    # 创建 license'))
     console.log('    $ rich license --year 2021-2023 --holder rich-flow')
     console.log()
   })
   .on('exit', console.log)
   .parse(process.argv)
 
-
-console.log(program.opts(), program.args)
 function help () {
   if (program.args.length < 2) return program.help()
 }
+
 help()
 
 async function main () {
-  const answer = await askQuestions([liscense])
+  const answer = await askQuestions([questions.liscense])
   const content = spdxLicenseList[answer.option].licenseText
     .replace(/<year>/g, program.args[0])
     .replace(/<copyright holders>/g, program.args[1])

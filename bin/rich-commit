@@ -2,15 +2,10 @@
 
 const { program } = require('commander');
 const chalk = require('chalk')
-const { commitType, commitScope, commitMsg, commitPush } = require('../lib/questions')
 const Logger = require('../lib/log')
+const service = require('../lib/service')
 const { 
-  command,
-  askQuestions,
-  hasLocalChanged, 
-  isRemoteBranch,
-  gitBranchIs,
-  oraPromise
+  hasLocalChanged
 } = require('../lib/utils.js')
 
 
@@ -33,38 +28,10 @@ function help () {
 
 help()
 
-async function getCommitCommand () {
-  let { type } = await askQuestions([commitType]);    // 选择提交类型：feat、fix、refactor、style……
-  let { scope } = await askQuestions([commitScope]);  // 填写影响范围
-  const { message } = await askQuestions([commitMsg]) // 填写提交信息
-  type = type.replace(/:.+/, '')
-  scope = scope ? '('+scope+')' : ''
-  return message 
-    ? Promise.resolve(`git commit -m '${type}${scope}: ${message}'`)
-    : Promise.reject('commit 信息不能为空')
-}
-
 async function main () {
   const localChanged = await hasLocalChanged()
-  let commitCommand
   if (localChanged) {                                   // 本地是否有修改
-    try {
-      commitCommand = await getCommitCommand()
-    } catch (err) {
-      Logger.error(err)
-      process.exit(0)
-    }
-
-    const { push } = await askQuestions([commitPush])   // 是否提交远程
-    await oraPromise(async () => {
-      await command('git add .')
-      await command(commitCommand)
-    }, {text: '正在执行commit'})
-    const currentBranch = await gitBranchIs()
-    const isRemote = await isRemoteBranch(currentBranch)
-    if (push) {
-      await command(`git push ${isRemote ? '' : `-u`} origin ${currentBranch}`)
-    }
+    service.commitCode()
   } else {
     Logger.warn('当前目录环境无代码修改')
   }

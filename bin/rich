@@ -1,22 +1,21 @@
 #!/usr/bin/env node
-
 const { program } = require('commander');
 
 program
   .version(require('../package').version)
   .usage('<command> [options]')
-  .command('list', 'list available project templates')                                       // 列出可用项目模板
-  .command('init', 'generate a new project from a template')                                 // 基于项目模板创建一个新项目
-  .command('run', 'run scripts')                                                             // 运行目标项目的script脚本
-  .command('install', 'install rich\'s plugin')                                              // 安装同构化配置
-  .command('lint:es', 'format code according to eslint')                                     // 根据eslint格式化代码
-  .command('lint:style', 'format code according to styelint')                                // 根据stylelint格式化代码
-  .command('renew', 'start a new iteration')                                                 // 从远程master重新创建覆盖本地分支
-  .command('branch', 'create a new branch')                                                  // 创建新的特性分支
-  .command('merge', 'join two or more development histories together')                       // 合并特性分支
-  .command('push', 'update remote refs along with associated objects')                       // 推送最新的代码远程
-  .command('ignore', 'ignore specified file')                                                // 忽略指定文件
-  .command('release', 'upgrade version no')
-  .command('license', 'generate license')
+  .command('list', '列出可用的项目模板')
+  .command('init', '从模板生成一个新项目')
+  .command('run', '运行 scripts 脚本')
+  .command('install', '安装项目插件')
+  .command('lint:es', '使用 eslint 格式化代码')
+  .command('lint:style', '使用 styelint 格式化代码')
+  .command('renew', '从远程master重新创建当前分支')
+  .command('branch', '分支操作')
+  .command('merge', '合并特性分支')
+  .command('push', '推送代码到远程服务器')
+  .command('ignore', '忽略指定文件')                                                // 忽略指定文件
+  .command('release', '升级版本号')
+  .command('license', '生成 license')
   .command('commit', '代码提交')
   .parse(process.argv)

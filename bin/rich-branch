@@ -2,12 +2,11 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const { branchType } = require('../lib/questions')
-const { warn, success, error } = require('../lib/log')
+const { success, error } = require('../lib/log')
+const service = require('../lib/service')
 const { 
   command, 
-  askQuestions, 
-  hasLocalChanged, 
-  oraPromise,
+  askQuestions,
   exec,
   terminalLink
 } = require('../lib/utils.js')
@@ -21,30 +20,32 @@ program
   .option('-s, --search',  'search branch')
   .option('-l, --link', 'description link')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # list git\'s branch'))
+    console.log(chalk.gray('    # 列出所有分支'))
     console.log('    $ rich branch')
     console.log()
-    console.log(chalk.gray('    # change git\'s branch'))
+    console.log(chalk.gray('    # 切换分支'))
     console.log('    $ rich branch f1')
     console.log()
-    console.log(chalk.gray('    # create git\'s new branch'))
+    console.log(chalk.gray('    # 创建分支'))
     console.log('    $ rich branch -b f1')
     console.log()
-    console.log(chalk.gray('    # create git\'s new branch and description'))
+    console.log(chalk.gray('    # 创建带描述的新分支'))
     console.log('    $ rich branch -b f1 -desc "hello world"')
     console.log()
-    console.log(chalk.gray('    # search git\'s branch'))
+    console.log(chalk.gray('    # 创建带描述和链接的新分支'))
+    console.log('    $ rich branch -b f1 -desc "hello world" -l "https://github.com/"')
+    console.log(chalk.gray('    # 模糊查询分支'))
     console.log('    $ rich branch -s f1')
     console.log()
-    console.log(chalk.gray('    # update git\'s branch description'))
+    console.log(chalk.gray('    # 更新分支的描述'))
     console.log('    $ rich branch -s f1 -desc "new description"')
     console.log()
-    console.log(chalk.gray('    # update git\'s branch description'))
+    console.log(chalk.gray('    # 更新分支描述和链接'))
     console.log('    $ rich branch -s f1 -desc "new description" -l "https://github.com/"')
     console.log()
-    console.log(chalk.gray('    # delete git\'s branch'))
+    console.log(chalk.gray('    # 删除分支'))
     console.log('    $ rich branch -d f1')
     console.log()
   })
@@ -112,22 +113,6 @@ async function getDescriptionByBranch (branchName, isCurrentBranch) {
   return description ? `${branchName}: ${description}` : branchName
 }
 
-
-/**
- * @description 暂存本地修改
- */
-async function stashCode () {
-  // 本地是否有修改，如果有则暂存
-  if (await hasLocalChanged()) {
-    warn('There are uncommitted codes, local staging has been performed for you')
-    await oraPromise(async () => {
-      await command('rm -rf .git/index.lock')
-      await command('git add .')
-      await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
-    }, {text: 'Staging code'})
-  }
-}
-
 /**
  * @description 打印分支信息
  * @param branchNames 分支列表
@@ -190,7 +175,7 @@ function searchWithDescription (keyword = '', withDescription = false) {
  */
 async function onDelete (branchName) {
   if (!options.delete) return 'next';
-  await stashCode(); // 贮藏本地修改
+  await service.uncommittedCode()
   return deleteBranch(branchName)
 }
 
@@ -234,9 +219,7 @@ function onBranch () {
 
 async function onChangeBranch () {
   if (options.branch || branchName === undefined ) return 'next';
-  if (await hasLocalChanged()) {
-    await stashCode()
-  }
+  await service.uncommittedCode()
   await command(`git checkout ${branchName}`)
   await command(`git pull`)
 }

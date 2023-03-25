@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 const { program } = require('commander');
 const chalk = require('chalk');
-const { warn } = require('../lib/log.js')
-const { hasLocalChanged, isRemoteBranch, command, gitBranchIs } = require('../lib/utils');
+const { isRemoteBranch, command, gitBranchIs } = require('../lib/utils');
+const service = require('../lib/service.js')
 
 program
   .name('rich')
   .usage('merge <branch-name>')
   .on('--help', () => {
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # merge git\'s branch'))
+    console.log(chalk.gray('    # 合并分支'))
     console.log('    $ rich merge feature-t1')
     console.log()
   })
@@ -24,13 +25,9 @@ help()
 
 let branchName = program.args[0];
 
-async function run () {
-  const [isChange, isRemote, currentBranch] = await Promise.all([hasLocalChanged(), isRemoteBranch(branchName), gitBranchIs()])
-  // 如果有本地修改，警告
-  if (isChange) {
-    warn('There are uncommitted codes')
-    process.exit(0)
-  }
+async function main () {
+  await service.uncommittedCode();
+  const [isRemote, currentBranch] = await Promise.all([isRemoteBranch(branchName), gitBranchIs()]);
   try {
     // 默认git merge 采用 fast-forward
     await command(`git merge ${branchName} --squash`)
@@ -44,4 +41,4 @@ async function run () {
   }
 }
 
-run()
+main()

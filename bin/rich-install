@@ -4,7 +4,22 @@ const { program } = require('commander');
 const chalk = require('chalk');
 const { askQuestions } = require('../lib/utils')
 const { packageType } = require('../lib/questions')
-const { command, hasLocalChanged, resolve, exists, mkdir, touch, stat, isRemoteRegistry, readFile, writeFile, oraPromise, jsonFormat, rm, gitBranchIs } = require('../lib/utils.js');
+const service = require('../lib/service.js')
+const { 
+  command,
+  resolve,
+  exists,
+  mkdir,
+  touch,
+  stat,
+  isRemoteRegistry,
+  readFile,
+  writeFile,
+  oraPromise,
+  jsonFormat,
+  rm,
+  gitBranchIs
+} = require('../lib/utils.js');
 // 默认的vscode配置
 const SETTINGS_CONFIG = require('../.vscode/settings.json')
 // 需要删除的文件
@@ -36,9 +51,9 @@ program
   .name('rich')
   .usage('install <plugin-name>')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # install rich\'s plugin'))
+    console.log(chalk.gray('    # 安装插件'))
     console.log('    $ rich install eslint')
     console.log()
   })
@@ -160,7 +175,7 @@ class FileOperator {
   static writeVsCodeConfig (settings) {
     return oraPromise(() => {
       if (!exists('.vscode')) mkdir('.vscode');
-      return writeFile('.vscode/settings.json', stringFormat(settings))
+      return writeFile('.vscode/settings.json', JSON.stringify(settings, null, '\t'))
     }, {text: '配置vscode'})
   }
 
@@ -286,14 +301,7 @@ const main = async () => {
   if (isNotInitNpm || isNotInitGit) {
     await CommandOperator.commit('init git and npm')
   }
-  // 本地是否有修改，如果有则暂存
-  if (await hasLocalChanged()) {
-    console.log(chalk.green('本地有修改但未提交的文件, 已为你进行本地暂存'))
-    await oraPromise(async () => {
-      await command('git add .')
-      await command(`git stash push -m "rich-flow stash your code at ${new Date().toLocaleString()}"`)
-    }, {text: '暂存代码'})
-  }
+  await service.uncommittedCode()
   
    // 切换到master分支
    if (!await gitBranchIs('master')) {

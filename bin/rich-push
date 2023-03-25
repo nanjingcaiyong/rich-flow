@@ -2,14 +2,15 @@
 const { program } = require('commander');
 const shell = require('shelljs');
 const chalk = require('chalk');
-const { isRemoteBranch, gitBranchIs, command } = require('../lib/utils.js')
+const { isRemoteBranch, gitBranchIs } = require('../lib/utils.js')
 
 program
   .name('rich')
   .usage('push <remote>')
   .on('--help', () => {
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # git push to remote'))
+    console.log(chalk.gray('    # 推送代码到远程'))
     console.log('    $ rich push origin')
     console.log()
   })
@@ -20,14 +21,13 @@ const remoteName = program.args[0]
 
 function help () {
   if (program.args.length < 1) return program.help()
- }
- 
- help()
+}
+
+help()
 
 async function run() {
   const localName = await gitBranchIs()
   const isRemote = await isRemoteBranch(localName) 
-  console.log(localName, isRemote, remoteName, await command('git remote -v'))
   if (!isRemote && remoteName) {
     shell.exec(`git push ${remoteName} -u ${localName}`)
   } else {

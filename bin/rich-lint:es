@@ -8,9 +8,9 @@ program
   .name('rich')
   .usage('lint:es [file] [dir]')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # format javascript code'))
+    console.log(chalk.gray('    # 格式化代码'))
     console.log('    $ rich lint:es')
     console.log()
   })

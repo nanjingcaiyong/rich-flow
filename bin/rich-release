@@ -1,52 +1,62 @@
 #!/usr/bin/env node
 
 const { program } = require('commander')
-const chalk = require('chalk')
-const { command, hasLocalChanged, gitBranchIs, askQuestions, readPackagejson, oraPromise } = require('../lib/utils')
-const { version } = require('../lib/questions')
 const path = require('path')
-const { success, warn } = require('../lib/log.js')
+const chalk = require('chalk')
+const { 
+  command, 
+  hasLocalChanged, 
+  gitBranchIs, 
+  askQuestions, 
+  readPackagejson, 
+  oraPromise, 
+  isRemoteBranch 
+} = require('../lib/utils')
+const { version, commitPush } = require('../lib/questions')
+const Logger = require('../lib/log.js')
+const service = require('../lib/service.js')
+
 program
   .name('rich')
   .usage('release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]')
   .option('--preid')
   .on('--help', () => {
-    console.log('  Examples:')
-    console.log(chalk.gray('    Pattern: major.minor.patch'))
+    console.log('  例如:')
+    console.log(chalk.gray('    规则: [major].[minor].[patch]'))
     console.log('')
-    console.log(chalk.gray('    # update the specified version'))
+    console.log(chalk.gray('    # 升级至指定版本'))
     console.log('    $ rich release 0.0.1')
     console.log('    // v0.0.1')
     console.log()
-    console.log(chalk.gray('    # update the patch version'))
+    console.log(chalk.gray('    # 升级修订版本'))
     console.log('    $ rich release patch')
     console.log('    // v0.0.2')
     console.log()
-    console.log(chalk.gray('    # update the minor version'))
+    console.log(chalk.gray('    # 升级次版本'))
     console.log('    $ rich release minor')
     console.log('    // v0.1.0')
     console.log()
-    console.log(chalk.gray('    # update the major version'))
+    console.log(chalk.gray('    # 升级主版本'))
     console.log('    $ rich release major')
     console.log('    // v1.0.0')
     console.log()
-    console.log(chalk.gray('    # update the premajor version'))
+    console.log(chalk.gray('    # 升级 premajor version'))
     console.log('    $ rich release premajor')
     console.log('    // v2.0.0-0')
     console.log()
-    console.log(chalk.gray('    # update the preminor version'))
+    console.log(chalk.gray('    # 升级 preminor version'))
     console.log('    $ rich release preminor')
     console.log('    // v2.1.0-0')
     console.log()
-    console.log(chalk.gray('    # update the prepatch version'))
+    console.log(chalk.gray('    # 升级 prepatch version'))
     console.log('    $ rich release prepatch')
     console.log('    // v2.1.1-0')
     console.log()
-    console.log(chalk.gray('    # update version from git latest tag')) // 读取git最新标签用作新的npm版本
+    console.log(chalk.gray('    # 根据git最新的tag版本升级')) // 读取git最新标签用作新的npm版本
     console.log('    $ rich release from-git')
     console.log('    // v2.1.1-1')
     console.log()
-    console.log(chalk.gray('    # use as a prefix for the prerelease'))
+    console.log(chalk.gray('    # 用作预发布的前缀'))
     console.log('    $ rich release prerelease --preid=alpha')
     console.log('    // v2.1.1-alpha.0')
     console.log()
@@ -65,18 +75,18 @@ function updateByParams () {
 
 /**
  * @description 通过命令行交互形式升级版本
- * @returns { string }
+ * @returns { string } 'feat' |'fix' | 'style' ……
  */
 async function updateByInquirer () {
-  const ans = await askQuestions([version])
-  return ans.option
+  const ans = await askQuestions([version]) || {}
+  return ans.option?.replace?.(/:.+/, '')
 }
 
 /**
- * @description 是否通过命令行参数形式表示指定版本
- * @returns { boolean }
+ * @description 是否通过命令行参数形式手动指定版本
+ * @returns { boolean } 
  */
-function isManual () {
+function isManualSetVerion () {
   return program.args.length > 0
 }
 
@@ -88,40 +98,19 @@ function exit () {
 }
 
 /**
- * @description 当前项目升级版本号
- * @returns 
- */
-async function generateLocalVersion () {
-  let newVersion = '';
-  // 有本地修改则退出
-  if (await hasLocalChanged()) {
-    warn('There are uncommitted codes')
-    exit()
-  }
-
-  let options = isManual() ? updateByParams() : await updateByInquirer();
-  try {
-    newVersion = await oraPromise(command.bind(null, `npm version ${options} --allow-same-version`),  { text: 'upgrade current item' })
-    newVersion = newVersion.replace('v', '');
-  } catch (err) {
-    console.error(err)
-    exit()
-  }
-  return newVersion
-}
-
-/**
- * @description 关联项目命令
+ * @description 在其它项目路径执行命令
  * @param path 关联项目地址
- * @returns 
+ * @returns { Function }
  */
 function exec (path) {
   return (script) => command(script, { cwd: path })
 }
 
+
 /**
  * @description 同步关联项目版本号
- * @param version 同步的版本号
+ * @param { version: string } 同步的版本号
+ * @param { dir: string } 项目路径
  */
 async function generateRelatedVersion (version, dir) {
   const absolutePath = path.resolve(process.cwd(), '../' + dir)
@@ -130,24 +119,71 @@ async function generateRelatedVersion (version, dir) {
   if (await hasLocalChanged()) {
     await cmd(`git stash save 'saved by version:${version}'`)
   }
-  // 切换到master分支
-  if (!await gitBranchIs('master', { cwd:  absolutePath })) {
-    await cmd('git switch master')
-  }
   await cmd(`npm version ${version} --allow-same-version`) || '';
 }
 
-async function main () {
-  const newVersion = await generateLocalVersion();
-  let items = readPackagejson().relatedItems; // 关联的项目路径, 可以是
-  if (items) {
-    items = Array.isArray(items) ? items : [items]
-    await Promise.all(items.map(dir => oraPromise(
-      generateRelatedVersion.bind(null, newVersion, dir), 
-      { text: `upgrade ${dir}`}
+/**
+ * @description 获取相关项目的路径
+ * @returns { Array }
+ */
+function getRelatedItems () {
+  let relatedItems = readPackagejson().relatedItems;      // 关联的项目路径
+  if (relatedItems) {
+    relatedItems = Array.isArray(relatedItems) ? relatedItems : [relatedItems]
+  }
+  return relatedItems
+}
+
+/**
+ * @description 升级配置的相关项目
+ * @param { newVersion: string } 新版本号
+ */
+async function upgradeRelatedItems (newVersion) {
+  let relatedItems = getRelatedItems()
+  if (relatedItems) {
+    await Promise.all(relatedItems.map(dir => 
+      oraPromise(generateRelatedVersion.bind(null, newVersion, dir), 
+      { text: `升级 ${dir}` }
     )))
   }
-  success(`version upgrade to ${newVersion}`)
+}
+
+/**
+ * @description 推送远程仓库
+ */
+async function pushRemoteRepository () {
+  const { push } = await askQuestions(commitPush); 
+  const currentBranch = await gitBranchIs()
+  const isRemote = await isRemoteBranch(currentBranch)
+  if (push) {
+    await oraPromise(() => command(`git push ${isRemote ? '' : `-u`} origin ${currentBranch}`), { text: '推送远程' })
+  }
+}
+
+/**
+ * @description 获取npm version的参数
+ * @returns { string }
+ */
+async function getVersionCommandOptions () {
+  return isManualSetVerion() ? updateByParams() : await updateByInquirer();
+}
+
+async function main () {
+  let newVersion = '';
+  await service.uncommittedCode();
+  const options = await getVersionCommandOptions();
+
+  try {
+    newVersion = await oraPromise(command.bind(null, `npm version ${options} --allow-same-version`),  { text: '升级当前项目' })
+    newVersion = newVersion.replace('v', '');
+  } catch (err) {
+    console.error(err)
+    exit()
+  }
+
+  await upgradeRelatedItems()
+  await pushRemoteRepository()
+  Logger.success(`项目版本升级至 ${newVersion}`)
 }
 
 main()

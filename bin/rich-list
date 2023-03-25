@@ -8,9 +8,9 @@ program
   .name('rich')
   .usage('list')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # list all project templates'))
+    console.log(chalk.gray('    # 列出可用的项目模板'))
     console.log('    $ rich list')
     console.log()
   })
@@ -37,7 +37,7 @@ request({
   const requestBody = JSON.parse(body)
     .filter(t => t.topics.includes(GITHUB.topic))
   if (Array.isArray(requestBody)) {
-    console.log('  The available project templates are as follows: ')
+    console.log('  下面是可用的项目模板： ')
     console.log()
     requestBody.length
       ? requestBody.forEach(repo => {

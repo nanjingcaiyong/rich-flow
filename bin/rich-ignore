@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const { program } = require('commander');
 const { command, stat, readFile, writeFile, oraPromise } = require('../lib/utils')
+const Logger = require('../lib/log')
 const chalk = require('chalk')
 const path = require('path')
 
@@ -8,9 +9,9 @@ program
   .name('rich')
   .usage('ignore <filename>')
   .on('--help', () => {
-    console.log('  Examples:')
+    console.log('  例如:')
     console.log()
-    console.log(chalk.gray('    # ignore specified file'))
+    console.log(chalk.gray('    # 忽略指定文件'))
     console.log('    $ rich ignore .DS_Store')
     console.log()
   })
@@ -40,16 +41,12 @@ async function addGitignore () {
 
 async function main () {
   if (await stat('.git')) {
-    return oraPromise(() => {
-      return Promise.all([
-          addGitignore(),
-          command(`git rm -r -n ${fileName} -f --ignore-unmatch`)
-        ].map(t => t.catch(console.log)))
-      },
-      { text: `add ignore ${fileName} file` }
+    return oraPromise(() => Promise.all([ addGitignore(), command(`git rm -r -n ${fileName} -f --ignore-unmatch`)]
+      .map(t => t.catch(console.log))),
+      { text: `设置忽略文件` }
     )
   }
-  console.log(chalk.red('Error: Uninitialized git'))
+  Logger.error('未初始化 git')
 }
 
 main()
