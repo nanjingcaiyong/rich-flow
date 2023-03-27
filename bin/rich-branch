@@ -8,17 +8,19 @@ const {
   command, 
   askQuestions,
   exec,
-  terminalLink
+  terminalLink,
+  gitBranchIs,
+  queryLocalBranches
 } = require('../lib/utils.js')
 
 program
   .name('rich')
   .usage('branch <branch-name>')
-  .option('-d, --delete',  'delete branch')
-  .option('-b, --branch',  'create branch and switch')
-  .option('-desc, --description', 'create branch description')
-  .option('-s, --search',  'search branch')
-  .option('-l, --link', 'description link')
+  .option('-d, --delete',  '删除分支')
+  .option('-b, --branch',  '创建或切换分支')
+  .option('-desc, --description', '添加描述')
+  .option('-s, --search',  '搜索分支')
+  .option('-l, --link', '添加描述链接')
   .on('--help', () => {
     console.log('  例如:')
     console.log()
@@ -56,7 +58,7 @@ const options = program.opts();               // 定义的option
 
 let branchName = program.args[0];             // 分支名称
 let description = program.args[1];            // 分支描述
-let link = program.args[2];        // 分支描述链接
+let link = program.args[2];                   // 分支描述链接
 
 
 let descriptionWithLink = description
@@ -83,13 +85,26 @@ async function createBranch (branchName) {
  * @param { branchName: string } 分支名称
  */
 async function deleteBranch () {
-  const str = program.args.reduce((str, name, index) => str += `${index > 0 ? ' ' : ''}${name}`, '')
+  const curBranchName = await gitBranchIs()
+  const localBranchNames = await queryLocalBranches()
+  if (program.args.includes(curBranchName)) {
+    error(`删除失败，不能位于待删除的分支`)
+    process.exit(0)
+  }
+  if (!localBranchNames.includes(curBranchName)) {
+    error(`删除失败，待删除的分支不存在`)
+    process.exit(0)
+  }
+  const str = program.args.reduce((str, name, index) => 
+    str += `${index > 0 ? ' ' : ''}${name}`, 
+    ''
+  )
   return command(`git branch -d ${str}`)
     .then(() => {
-      success(`Branch ${str.replace(/\s/g, '、')} deleted`)
+      success(`分支 ${str.replace(/\s/g, '、')} 已删除`)
     })
-    .catch(() => {
-     error(`Failed to delete. There is no branch named '${str}'`)
+    .catch((err) => {
+      error(`删除失败，${err}`)
     })
 }
 
@@ -164,7 +179,7 @@ function searchWithDescription (keyword = '', withDescription = false) {
       const branchesWithDescription = await Promise.all(stack)
       print(branchesWithDescription)
     }).catch(() => {
-      error('Unmatched')
+      error('不匹配')
     })
 }
 
@@ -188,10 +203,10 @@ async function onDelete (branchName) {
   if (!options.branch) return 'next';
   return createBranch(branchName)
     .then((newBranchName) => {
-      success(`A branch named '${chalk.green(newBranchName)}' has been created for you`)
+      success(`已创建分支 '${chalk.green(newBranchName)}'`)
     })
     .catch((newBranchName) => {
-      error(`Failed to create. A branch named '${newBranchName}' already exists`)
+      error(`创建失败，分支 '${newBranchName}' 已存在`)
     })
 }
 
