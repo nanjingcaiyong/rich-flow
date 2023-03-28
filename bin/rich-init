@@ -13,7 +13,9 @@ const logger = require('../lib/logger')
 const generate = require('../lib/generate')
 const checkVersion = require('../lib/check-version')
 const localPath = require('../lib/local-path')
-const { askQuestions } = require('../lib/utils')
+const { askQuestions, oraPromise } = require('../lib/utils')
+const { queryTemplates } = require('../lib/service')
+const questions = require('../lib/questions.js')
 
 const isLocalPath = localPath.isLocalPath
 const getTemplatePath = localPath.getTemplatePath
@@ -37,85 +39,80 @@ program
   .on('exit', console.log)
   .parse(process.argv)
 
-function help () {
-  if (program.args.length < 1) return program.help()
-}
+const options = program.opts();
 
-help()
-
-let template = program.args[0]; // 模板名称
-const options = program.opts()
-const hasSlash = template.indexOf('/') > -1
-const rawName = program.args[1]
-const inPlace = !rawName || rawName === '.'
-const name = inPlace ? path.relative('../', process.cwd()) : rawName
-const to = path.resolve(rawName || '.')
-const clone = options.clone || false
-
-const tmp = path.join(home, '.rich-templates', template.replace(/[\/:]/g, '-'))
-if (options.offline) {
-  console.log(`> 使用缓存模板 ${chalk.yellow(tildify(tmp))}`)
-  template = tmp
-}
-
-/**
- * 从远程模板库下载一个模板
- * @param {String} template
- */
- function downloadAndGenerate (template) {
-  const spinner = ora('下载模板')
-  spinner.start()
-  // 如果没有指定--offline，则会从远程下载并覆盖本地缓存的模版
-  if (exists(tmp)) rm(tmp)
-  download(template, tmp, { clone }, err => {
-    spinner.stop()
-    if (err) logger.fatal('模板' + template + '下载失败: ' + err.message.trim())
-    generate(name, tmp, to, err => {
-      if (err) logger.fatal(err)
-      console.log()
-      logger.success('生成 "%s".', name)
-    })
+async function main () {
+  const templates = await oraPromise(queryTemplates, {text: '获取项目模板'})
+  const choices = templates.map(repo => `${repo.name}: ${repo.description}`)
+  let { template } = await askQuestions({
+    name: 'template',
+    type: 'list',
+    message: '请选择项目模板',
+    choices,
+    default: 0
   })
-}
-
-function main () {
-  // 判断模版是否是本地路径
-  if (isLocalPath(template)) {
-    const templatePath = getTemplatePath(template)
-    if (exists(templatePath)) {
-      generate(name, templatePath, to, err => {
+  template = template.replace(/:.+/, '');                                     // 模板名称
+  const { name: projectName } = await askQuestions(questions.projectName);    // 项目文件夹名称
+  const inPlace = !projectName || projectName === '.';                        // 文件夹为"空"或"."时为true
+  const name = inPlace ? path.relative('../', process.cwd()) : projectName;   // 如果输入的项目名为"空"或为"."则不生成新的文件夹，在当前目录下载项目
+  const to = path.resolve(projectName || '.');                                // 下载路径
+  const clone = options.clone || false;
+  const tmp = path.join(home, '.rich-templates', template.replace(/[/:]/g, '-'))
+  /**
+   * 从远程模板库下载一个模板
+   * @param {String} template
+   */
+  function downloadAndGenerate (template) {
+    const spinner = ora('下载模板')
+    spinner.start()
+    // 如果没有指定--offline，则会从远程下载并覆盖本地缓存的模版
+    if (exists(tmp)) rm(tmp)
+    download(template, tmp, { clone }, err => {
+      spinner.stop()
+      if (err) logger.fatal('模板' + template + '下载失败: ' + err.message.trim())
+      generate(name, tmp, to, err => {
         if (err) logger.fatal(err)
         console.log()
         logger.success('生成 "%s".', name)
       })
-    } else {
-      logger.fatal('没找到 "%s" 的本地模板', template)
-    }
-  } else {
-    checkVersion(() => {
-      if (!hasSlash) {
-        // 使用模板地址
-        const officialTemplate = 'nanjingcaiyong/' + template
-        downloadAndGenerate(officialTemplate)
-      } else {
-        downloadAndGenerate(template)
-      }
     })
+  }
+
+  function excute () {
+    const officialTemplate = 'nanjingcaiyong/' + template
+    // 判断模版是否是本地路径
+    if (isLocalPath(template)) {
+      const templatePath = getTemplatePath(template)
+      if (exists(templatePath)) {
+        generate(name, templatePath, to, err => {
+          if (err) logger.fatal(err)
+          console.log()
+          logger.success('生成 "%s".', name)
+        })
+      } else {
+        logger.fatal('没找到 "%s" 的本地模板', template)
+      }
+    } else {
+      checkVersion(() => downloadAndGenerate(officialTemplate))
+    }
+  }
+  if (options.offline) {
+    console.log(`> 使用缓存模板 ${chalk.yellow(tildify(tmp))}`)
+    template = tmp
+  }
+  if (inPlace || exists(to)) {
+    askQuestions([{
+      type: 'confirm',
+      message: inPlace
+        ? '是否在当前目录中生成项目？'
+        : '目标目录已存在。是否继续?',
+      name: 'ok'
+    }]).then(answers => {
+      if (answers.ok) excute();
+    }).catch(logger.fatal)
+  } else {
+    excute()
   }
 }
 
-if (inPlace || exists(to)) {
-  askQuestions([{
-    type: 'confirm',
-    message: inPlace
-      ? '是否在当前目录中生成项目？'
-      : '目标目录已存在。是否继续?',
-    name: 'ok'
-  }]).then(answers => {
-    if (answers.ok) {
-      main()
-    }
-  }).catch(logger.fatal)
-} else {
-  main()
-}
+main()
