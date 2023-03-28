@@ -7,7 +7,7 @@
 </p>
 
 
-> rich 工作流. 覆盖项目全链路生命周期，在于统一脚手架、规范同构化、命令，集中维护、管理，更具语义化
+> rich 工作流. 覆盖项目全链路生命周期（初始化、开发、构建、校验、发布），统一脚手架、同构化规范、集成git命令等，通过语义化脚本集中维护、管理
 
 
 ## 安装
@@ -69,6 +69,17 @@ rich run lint:style  [<文件地址>...] [<路径>...] [--fix]
 
 ### 2、Git操作集
 
+#### commit: 交互式commit信息生成，规范提交内容格式
+```sh
+rich commit
+```
+
+#### renew: 远程更新分支
+```sh
+# 删除指定的分支，从master重新创建
+rich renew [<分支名>...]
+```
+
 #### branch: 分支相关操作
 ```sh
 # 查看分支（带备注）
@@ -92,11 +103,6 @@ rich branch -b <分支名> -desc <message>
 # 给分支做备注并赋链接
 rich branch -b <分支名> -desc <message> -l <url>
 ```
-#### renew: 远程更新分支
-```sh
-# 删除指定的分支，从master重新创建
-rich renew [<分支名>...]
-```
 
 #### merge: 合并分支
 ```sh
@@ -114,11 +120,6 @@ rich push
 ```sh
 # 删除项目中所有.DS_Store文件，并添加至.gitnore
 rich ignore .DS_Store
-```
-
-#### commit: 交互式commit信息生成，规范提交内容格式
-```sh
-rich commit
 ```
 
 ## 3、安装插件
