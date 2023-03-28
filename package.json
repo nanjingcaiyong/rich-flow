@@ -1,6 +1,6 @@
 {
   "name": "rich-workflow",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "covering the entire chain life cycle of the project, in the unified scaffolding, isomorphic scheme, command, centralized maintenance and management, more meaningful",
   "main": "index.js",
   "bin": {
