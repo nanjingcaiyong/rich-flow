@@ -1,8 +1,18 @@
 #!/usr/bin/env node
 const { program } = require('commander');
 const chalk = require('chalk');
-const { isRemoteBranch, command, gitBranchIs } = require('../lib/utils');
+const { 
+  isRemoteBranch, 
+  command, 
+  gitBranchIs, 
+  oraPromise, 
+  queryLocalBranches,
+  askQuestions,
+  hasLocalChanged
+} = require('../lib/utils');
 const service = require('../lib/service.js')
+const Logger = require('../lib/log')
+const questions = require('../lib/questions')
 
 program
   .name('rich')
@@ -11,14 +21,14 @@ program
     console.log('  例如:')
     console.log()
     console.log(chalk.gray('    # 合并分支'))
-    console.log('    $ rich merge feature-t1')
+    console.log('    $ rich merge feat/f1')
     console.log()
   })
   .on('exit', console.log)
   .parse(process.argv)
 
 function help () {
- if (program.args.length < 1) return program.help()
+  if (program.args.length < 1) return program.help()
 }
 
 help()
@@ -27,16 +37,42 @@ let branchName = program.args[0];
 
 async function main () {
   await service.uncommittedCode();
-  const [isRemote, currentBranch] = await Promise.all([isRemoteBranch(branchName), gitBranchIs()]);
+  const stack = [];
+  const [isRemote, currentBranch, localBranches] = await Promise.all([
+    isRemoteBranch(branchName),
+    gitBranchIs(),
+    queryLocalBranches()
+  ]);
   try {
-    // 默认git merge 采用 fast-forward
-    await command(`git merge ${branchName} --squash`)
-    await command(`git commit -am "Merge branch '${branchName}' into ${currentBranch}"`)
-    await command(`git branch -d ${branchName}`)
-    if (isRemote) {
-      await command(`git push origin -d ${branchName}`)
+    if (!localBranches.includes(branchName)) {
+      Logger.error(`本地不存在"${branchName}"分支`)
+      process.exit(0)
     }
+    await command(`git merge ${branchName} --squash`)
+    if (!await hasLocalChanged()) {
+      Logger.warn('已经是最新的')
+      process.exit(0)
+    }
+    // 默认git merge 采用 fast-forward
+    await oraPromise(async () => {
+      await command(`git commit -am "Merge branch '${branchName}' into ${currentBranch}"`)
+    }, { text: '提交代码' })
+
+    const { push } = await askQuestions([questions.commitPush])
+    const { local } = await askQuestions([questions.delLocalBranch])
+    const { remote } = await askQuestions([questions.delRomoteBranch])
+    if (push) {
+      await oraPromise(command.bind(null, `git push ${isRemote ? '' : `-u`} origin ${currentBranch}`), {text: '推送远程'})
+    }
+    if (local) {
+      stack.push(command.call(null, `git branch -D ${branchName}`))
+    }
+    if (remote && isRemote) {
+      stack.push(command.call(null, `git push origin -d ${branchName}`))
+    }
+    oraPromise(() => Promise.all(stack), { text: '删除特性分支' })
   } catch (err) {
+    Logger.error(err)
     //
   }
 }
