@@ -69,7 +69,7 @@ async function main () {
     if (exists(tmp)) rm(tmp)
     download(template, tmp, { clone }, err => {
       spinner.stop()
-      if (err) logger.fatal('模板' + template + '下载失败: ' + err.message.trim())
+      if (err) logger.fatal('模板 "' + template + '" 下载失败: ' + err.message.trim())
       generate(name, tmp, to, err => {
         if (err) logger.fatal(err)
         console.log()
