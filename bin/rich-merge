@@ -35,9 +35,33 @@ help()
 
 let branchName = program.args[0];
 
+/**
+ * @description 如果在主分支master上合并特性分支，则提供删除特性分支选项
+ * @param { string } currentBranch 当前分支名 
+ * @param { boolean } isRemote 是否是远程分支 
+ */
+async function deleteBranchIfMaster (currentBranch, isRemote = false) {
+  const stack = [];
+  // 如果当前分支是master分支则删除合并的远程分支
+  if (currentBranch === 'master') {
+    const { local } = await askQuestions([questions.delLocalBranch])
+    const { remote } = await askQuestions([questions.delRomoteBranch])
+    if (local) {
+      stack.push(command.call(null, `git branch -D ${branchName}`))
+    }
+    if (remote && isRemote) {
+      stack.push(command.call(null, `git push origin -d ${branchName}`))
+    }
+    if (stack.length) {
+      oraPromise(() => Promise.all(stack), { text: '删除特性分支' })
+    }
+
+  }
+
+}
+
 async function main () {
   await service.uncommittedCode();
-  const stack = [];
   const [isRemote, currentBranch, localBranches] = await Promise.all([
     isRemoteBranch(branchName),
     gitBranchIs(),
@@ -59,21 +83,13 @@ async function main () {
     }, { text: '提交代码' })
 
     const { push } = await askQuestions([questions.commitPush])
-    const { local } = await askQuestions([questions.delLocalBranch])
-    const { remote } = await askQuestions([questions.delRomoteBranch])
+
     if (push) {
       await oraPromise(command.bind(null, `git push ${isRemote ? '' : `-u`} origin ${currentBranch}`), {text: '推送远程'})
     }
-    if (local) {
-      stack.push(command.call(null, `git branch -D ${branchName}`))
-    }
-    if (remote && isRemote) {
-      stack.push(command.call(null, `git push origin -d ${branchName}`))
-    }
-    oraPromise(() => Promise.all(stack), { text: '删除特性分支' })
+    deleteBranchIfMaster(currentBranch, isRemote)
   } catch (err) {
     Logger.error(err)
-    //
   }
 }
 
