@@ -3,36 +3,53 @@
 ## 安装
 
 ```sh
-npm i rich-flow -g
+npm i rich-workflow -g
 ```
 
-## 查看项目模板
+## 查看项目模板列表
 
 ```sh
 rich list
 ```
 
-![项目模板](/assets/templates.png)
-
-## 初始化模板
-
-进入你想创建项目的目录，使用 `rich init <template>` 命令即可创建项目
+![项目模板](/assets/list.png)
 
 
-## 创建项目目录并初始化模版
-
-rich init \<template\> \<project\>
+## 初始化项目模版
 
 ```sh
-rich init mpa hello-world
+# 拉取最近项目模板，并缓存本地
+rich init
+# 使用本地缓存的项目模板创建新项目
+rich init --offline
 ```
 
-![初始化项目](/assets/init.png)
+第一步：选择需要初始化的项目模板
+![初始化项目](/assets/init1.png)
 
-## 利用缓存的模版初始化项目
+第二步：输入生成的文件夹名称
+![初始化项目](/assets/init2.png)
 
-为了提高二次使用模板的效率，可以添加 --offline 选项，提高初始化项目速度
+第三步：输入项目名称(package.json 中 name)
+![初始化项目](/assets/init3.png)
 
-```sh
-rich init mpa hello-world --offline
-```
+第四步：输入项目描述(package.json 中 description)
+![初始化项目](/assets/init4.png)
+
+第五步：输入作者(package.json 中 author)
+![初始化项目](/assets/init5.png)
+
+第六步：是否使用eslint
+![初始化项目](/assets/init6.png)
+
+第七步：是否使用typescript
+![初始化项目](/assets/init7.png)
+
+第八步：是否使用tailwindcss
+![初始化项目](/assets/init8.png)
+
+第九步：使用哪种方式安装依赖包
+![初始化项目](/assets/init9.png)
+
+第十步：进入并启动项目
+![初始化项目](/assets/init10.png)

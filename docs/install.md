@@ -3,13 +3,15 @@
 
 ## 安装工作流
 ```sh
-npm i rich-flow
+npm i rich-workflow -g
 ```
 
 ## 查看版本
 
 ```sh
-rich -h
+rich --version
+# 简写
+rich -V
 ```
 
 ## 查看模板列表
