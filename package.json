@@ -46,6 +46,7 @@
     "name": "yong.cai",
     "email": "yong.cai@kapeixi.com"
   },
+  "homepage": "https://nanjingcaiyong.github.io/caiyong.github.io",
   "license": "ISC",
   "dependencies": {
     "async": "^3.2.3",
