@@ -1,7 +1,11 @@
 # npm 相关操作
 
-## publish 发包
+## 版本升级
 
 ```sh
-rich publish
+rich release
 ```
+
+选择升级版本类型：
+
+![项目模板](/assets/release1.png)

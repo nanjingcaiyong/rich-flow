@@ -1,7 +1,7 @@
 # 快速开始
 
 
-## 安装工作流
+## 全局安装
 ```sh
 npm i rich-workflow -g
 ```
@@ -14,10 +14,10 @@ rich --version
 rich -V
 ```
 
-## 查看模板列表
+## 查看项目模板列表
 
 ```sh
 rich list
 ```
 
-![项目模板](/assets/templates.png)
+![项目模板](/assets/list.png)

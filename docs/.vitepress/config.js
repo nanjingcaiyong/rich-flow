@@ -20,7 +20,7 @@ const config = defineConfig({
             link: '/project.md'
           },
           {
-            text: '启动脚本',
+            text: '项目脚本',
             link: '/start.md'
           }
         ]
@@ -32,14 +32,6 @@ const config = defineConfig({
           {
             text: 'ESLint',
             link: '/eslint.md'
-          },
-          {
-            text: 'StyleLint',
-            link: '/eslint.md'
-          },
-          {
-            text: 'CommitLint',
-            link: '/eslint.md'
           }
         ]
       },
@@ -48,53 +40,29 @@ const config = defineConfig({
         collapsible: true,
         items: [
           {
-            text: 'renew',
-            link: '/git.md'
-          },
-          {
-            text: 'add',
-            link: '/git.md'
-          },
-          {
             text: 'branch',
             link: '/git/branch.md'
           },
           {
             text: 'commit',
-            link: '/git.md'
-          },
-          {
-            text: 'fetch',
-            link: '/git.md'
+            link: '/git/commit.md'
           },
           {
             text: 'merge',
-            link: '/git.md'
+            link: '/git/merge.md'
           },
           {
-            text: 'pull',
-            link: '/git.md'
-          },
-          {
-            text: 'push',
-            link: '/git.md'
-          },
-          {
-            text: 'switch',
-            link: '/git.md'
-          },
+            text: 'ignore',
+            link: '/git/ignore.md'
+          }
         ]
       },
       {
-        text: 'npm相关操作',
+        text: 'npm',
         collapsible: true,
         items: [
           {
             text: '升级版本',
-            link: '/npm.md'
-          },
-          {
-            text: '发包',
             link: '/npm.md'
           }
         ]

@@ -3,34 +3,31 @@
 
 ## 启动项目
 
-rich run dev:\<env\>
 
 ```sh
-// 启动测试环境
-rich run dev:sit
+rich run dev
 ```
 
 ## 项目打包
-
-rich run build:\<env\>
 ```sh
-// 启动测试环境
-rich run build:sit
+rich run build
 ```
 
 
 ## 代码校验
 
 ```sh
-// 校验 eslint 规则
-rich lint:es
-// 校验 stylelint 规则
-rich lint:style
+# 校验 eslint
+rich run lint:es
+# 校验 stylelint
+rich run lint:style
 ```
 
 ## 项目格式化
 
 ```sh
+# 使用 eslint 进行代码格式化
 rich lint:es --fix
+# 使用 stylelint 进行代码格式化
 rich lint:style --fix
 ```
