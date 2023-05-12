@@ -10,7 +10,8 @@ const {
   exec,
   terminalLink,
   gitBranchIs,
-  queryLocalBranches
+  isLocalBranch,
+  isRemoteBranch
 } = require('../lib/utils.js')
 
 program
@@ -67,6 +68,28 @@ if (options.description && options.link) {
 }
 
 /**
+ * @description 分支是否位于当前分支
+ * @param { string | string[] } 分支名
+ * @returns { boolean }
+ */
+async function isLocateCurrentBranch (branchName) {
+  const curBranchName = await gitBranchIs();
+  return Array.isArray(branchName) 
+    ? branchName.includes(curBranchName) 
+    : branchName === curBranchName
+}
+
+/**
+ * @description 解析分支
+ * @param { string } 命令行字符串 
+ * @returns 
+ */
+function strToBranchNames (str) {
+  return str.trim().split(/(?:\n|$)(?:\s)*/)
+}
+
+
+/**
  * @description 创建新分支
  * @param { branchName: string } 分支名称
  */
@@ -85,13 +108,12 @@ async function createBranch (branchName) {
  * @param { branchName: string } 分支名称
  */
 async function deleteBranch () {
-  const curBranchName = await gitBranchIs()
-  const localBranchNames = await queryLocalBranches()
-  if (program.args.includes(curBranchName)) {
+  const DELETE_BRANCHES = program.args;                         // 待删除的分支，一个或多个
+  if (await isLocateCurrentBranch(DELETE_BRANCHES)) {
     error(`删除失败，不能位于待删除的分支`)
     process.exit(0)
   }
-  if (!localBranchNames.includes(curBranchName)) {
+  if (!await isLocalBranch(DELETE_BRANCHES)) {
     error(`删除失败，待删除的分支不存在`)
     process.exit(0)
   }
@@ -104,7 +126,7 @@ async function deleteBranch () {
       success(`分支 ${str.replace(/\s/g, '、')} 已删除`)
     })
     .catch((err) => {
-      error(`删除失败，${err}`)
+      error(err)
     })
 }
 
@@ -147,8 +169,8 @@ function print (branchNames) {
  * @param { string } str 命令返回的字符串 
  * @returns { Object } {[branchName]: isCurrentBranch} branchName 分支名，isCurrentBranch 是否是当前分支
  */
-function getBranchNamesFromCommand (str) {
-  const branches = str.trim().split(/(?:\n|$)(?:\s)*/)
+function getBranchesFromCommand (str) {
+  const branches = strToBranchNames(str)
   return branches.reduce((obj, rowName) => {
     let isCurrentBranch = false
     let branchName = rowName
@@ -170,7 +192,7 @@ function getBranchNamesFromCommand (str) {
 function searchWithDescription (keyword = '', withDescription = false) {
   return exec(`git branch | grep '${keyword}'`)
     .then(async res => {
-      const branchMap = getBranchNamesFromCommand(res.stdout)
+      const branchMap = getBranchesFromCommand(res.stdout)
       const branchNames = Object.keys(branchMap)
       if (branchNames.length === 1 && withDescription) {
         await setBranchDescription(branchNames[0], descriptionWithLink)
@@ -232,29 +254,50 @@ function onBranch () {
   return searchWithDescription('', true)
 }
 
+/**
+ * @description 分支切换
+ * @returns 
+ */
 async function onChangeBranch () {
-  if (options.branch || branchName === undefined ) return 'next';
-  await service.uncommittedCode()
-  await command(`git checkout ${branchName}`)
-  await command(`git pull`)
+  if (options.branch || program.args.length !== 1) return 'next';
+  const branchName = program.args[0]
+  const [res1, res2] = await Promise.all([isLocalBranch(branchName), isRemoteBranch(branchName)])
+  if (res1 || res2) {
+    await service.uncommittedCode()
+    await command(`git switch ${program.args[0]}`)
+    if (res2) {
+      await command(`git pull`)
+    }
+  } else {
+    error('分支不存在')
+  }
 }
 
 /**
- * @description 分支操作责任链链
+ * @description 分支操作
  * @param branchName 分支名称
- * @param handlers 
+ * @param commands 命令集
  */
-async function chain (branchName, handlers) {
+async function chain (branchName, commands) {
   let index = -1
-  while(++index < handlers.length) {
-    if (await handlers[index](branchName) !== 'next') {
+  while(++index < commands.length) {
+    if (await commands[index](branchName) !== 'next') {
       break
     }
   }
 }
 
+/**
+ * @description 主逻辑
+ */
 async function main () {
-  await chain(branchName, [onDelete, onSearch, onCreate, onChangeBranch, onBranch])
+  await chain(branchName, [
+    onDelete,
+    onSearch,
+    onCreate,
+    onChangeBranch,
+    onBranch,
+  ])
 }
 
 main()
