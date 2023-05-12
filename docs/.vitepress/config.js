@@ -83,8 +83,8 @@ const config = defineConfig({
       text: '编辑页面'
     },
     algolia: {
-      apiKey: '6b309d5f974ba74bf99a3613aa539ff7',
-      appId: '3Z4NVAYK05',
+      apiKey: 'fbac67facface4f8ccc1d1816529d20f',
+      appId: 'JMMLA5H26B',
       indexName: 'rich-flow',
       algoliaOptions: {
         hitsPerPage: 10,
