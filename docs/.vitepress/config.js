@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress'
 const config = defineConfig({
-  base: '/caiyong.github.io/',
+  base: '/',
   lang: 'zh-CN',
   title: 'rich-flow 中文文档',
   description: '致力于提升研发效率和规范的工程化解决方案',
