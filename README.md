@@ -59,12 +59,12 @@ rich release [版本号]
 
 #### js代码格式化
 ```sh
-rich run lint:es [<文件地址>...] [<路径>...] [--fix]
+rich lint:es [<文件地址>...] [<路径>...] [--fix]
 ```
 
 #### style代码格式化
 ```sh
-rich run lint:style  [<文件地址>...] [<路径>...] [--fix]
+rich lint:style  [<文件地址>...] [<路径>...] [--fix]
 ```
 
 ### 2、Git操作集

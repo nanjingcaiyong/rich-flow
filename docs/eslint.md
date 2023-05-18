@@ -10,10 +10,10 @@ rich install eslint
 
 检查代码风格问题
 ```sh
-rich run lint:es
+rich lint:es
 ```
 
 自动格式化代码
 ```sh
-rich run lint:es --fix
+rich lint:es --fix
 ```

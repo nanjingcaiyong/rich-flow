@@ -29,9 +29,11 @@ function main () {
   
   baseShell += pathes.reduce((s, p) => s += ` ${p}`, '')
 
+
   oraPromise(command.bind(null, baseShell), {text: 'lint code'})
     .catch(console.log)
 }
 
+console.log('sdfsdfsdfsf')
 main()
 
