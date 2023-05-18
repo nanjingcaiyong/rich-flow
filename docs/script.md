@@ -8,6 +8,10 @@
 rich run dev
 ```
 
+![初始化项目](/assets/script1.png)
+
+![初始化项目](/assets/script2.png)
+
 ## 项目打包
 ```sh
 rich run build

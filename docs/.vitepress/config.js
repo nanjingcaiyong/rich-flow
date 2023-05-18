@@ -21,7 +21,7 @@ const config = defineConfig({
           },
           {
             text: '项目脚本',
-            link: '/start.md'
+            link: '/script.md'
           }
         ]
       },
