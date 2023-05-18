@@ -2,13 +2,13 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const { 
-  isRemoteBranch, 
-  command, 
-  gitBranchIs, 
-  oraPromise, 
-  queryLocalBranches,
+  isRemoteBranch,
+  command,
+  gitBranchIs,
+  oraPromise,
   askQuestions,
-  hasLocalChanged
+  hasLocalChanged,
+  isBranchExist
 } = require('../lib/utils');
 const service = require('../lib/service.js')
 const Logger = require('../lib/log')
@@ -61,14 +61,14 @@ async function deleteBranchIfMaster (currentBranch, isRemote = false) {
 }
 
 async function main () {
-  await service.uncommittedCode();
-  const [isRemote, currentBranch, localBranches] = await Promise.all([
+  await service.uncommittedCode();        // 本地暂存文件
+  const [isRemote, currentBranch, isExist] = await Promise.all([
     isRemoteBranch(branchName),
     gitBranchIs(),
-    queryLocalBranches()
+    isBranchExist(branchName)
   ]);
   try {
-    if (!localBranches.includes(branchName)) {
+    if (!isExist) {
       Logger.error(`本地不存在"${branchName}"分支`)
       process.exit(0)
     }
