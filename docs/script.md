@@ -22,16 +22,16 @@ rich run build
 
 ```sh
 # 校验 eslint
-rich lint:es
+rich run lint:es
 # 校验 stylelint
-rich lint:style
+rich run lint:style
 ```
 
 ## 项目格式化
 
 ```sh
 # 使用 eslint 进行代码格式化
-rich lint:es --fix
+rich run lint:es --fix
 # 使用 stylelint 进行代码格式化
-rich lint:style --fix
+rich run lint:style --fix
 ```

@@ -5,15 +5,3 @@
 ```sh
 rich install eslint
 ```
-
-## 使用
-
-检查代码风格问题
-```sh
-rich lint:es
-```
-
-自动格式化代码
-```sh
-rich lint:es --fix
-```

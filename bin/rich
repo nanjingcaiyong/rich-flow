@@ -8,8 +8,6 @@ program
   .command('init', '从模板生成一个新项目')
   .command('run', '运行 scripts 脚本')
   .command('install', '安装项目插件')
-  .command('lint:es', '使用 eslint 格式化代码')
-  .command('lint:style', '使用 styelint 格式化代码')
   .command('renew', '从远程master重新创建当前分支')
   .command('branch', '分支操作')
   .command('merge', '合并特性分支')

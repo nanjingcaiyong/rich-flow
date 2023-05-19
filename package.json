@@ -9,8 +9,6 @@
     "init": "bin/rich-init",
     "rich-run": "bin/rich-run",
     "rich-install": "bin/rich-install",
-    "lint:es": "bin/rich-lint:es",
-    "lint:style": "bin/rich-lint:style",
     "rich-renew": "bin/rich-renew",
     "rich-branch": "bin/rich-branch",
     "rich-merge": "bin/rich-merge",
