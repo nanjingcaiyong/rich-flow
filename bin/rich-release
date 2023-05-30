@@ -141,10 +141,9 @@ function getRelatedItems () {
 async function upgradeRelatedItems (newVersion) {
   let relatedItems = getRelatedItems()
   if (relatedItems) {
-    await Promise.all(relatedItems.map(dir => 
-      oraPromise(generateRelatedVersion.bind(null, newVersion, dir), 
-      { text: `升级 ${dir}` }
-    )))
+    await Promise.all(relatedItems.map(dir => {
+      return oraPromise(generateRelatedVersion.bind(null, newVersion, dir), { text: `升级 ${dir}` })}
+    ))
   }
 }
 
@@ -181,7 +180,7 @@ async function main () {
     exit()
   }
 
-  await upgradeRelatedItems()
+  await upgradeRelatedItems(newVersion)
   await pushRemoteRepository()
   Logger.success(`项目版本升级至 ${newVersion}`)
 }

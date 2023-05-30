@@ -4,8 +4,8 @@ const chalk = require('chalk');
 const { branchType } = require('../lib/questions')
 const { success, error } = require('../lib/log')
 const service = require('../lib/service')
-const { 
-  command, 
+const {
+  command,
   askQuestions,
   exec,
   terminalLink,

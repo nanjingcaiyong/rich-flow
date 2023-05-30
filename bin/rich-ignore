@@ -4,7 +4,7 @@ const { command, stat, readFile, writeFile, oraPromise } = require('../lib/utils
 const Logger = require('../lib/log');
 const chalk = require('chalk');
 const path = require('path');
-const service = require('../lib/service')
+const keys = require('../lib/keys');
 
 program
   .name('rich')
@@ -27,27 +27,34 @@ help()
 
 const fileName = process.argv[2]; // 需要忽略的文件或路径
 
-async function addGitignore () {
+/**
+ * @description .gitignore 文件追加忽略的文件
+ */
+async function fileIgnore () {
   const rootPath = path.resolve(process.cwd(), '.gitignore')
-  const fileGlob = `${fileName}`
+  let fileGlob = `${fileName}`
   if (await stat('.gitignore')) {               // 有.gitignore文件
     const content = await readFile(rootPath)
     if (content.indexOf(fileGlob) === -1) {     // fileGlob 是否已存在
-      writeFile(rootPath, content + '\n' + fileGlob)
+      fileGlob = content + keys.NEWLINE + fileGlob
     }
-  } else {
-    writeFile(rootPath, fileGlob)
   }
+  writeFile(rootPath, fileGlob)
+}
+
+/**
+ * @description git 忽略文件
+ * @returns { Promise }
+ */
+function gitIgnore () {
+  return command(`git rm -r --cached ${fileName} -f --ignore-unmatch`)
 }
 
 async function main () {
-  if (await stat('.git')) {
-    return oraPromise(() => Promise.all([ addGitignore(), command(`git rm -r --cached ${fileName} -f --ignore-unmatch`)]
-      .map(t => t.catch(console.log))),
-      { text: `设置忽略文件` }
-    ).then(() => {
-      service.commitCode()
-    })
+  if (await stat('.git')) {                  // 是否初始化了 git
+    return oraPromise(() => 
+      Promise.all([fileIgnore(), gitIgnore()]
+        .map(t => t.catch(console.log))),{ text: `设置忽略文件` })
   }
   Logger.error('未初始化 git')
 }
