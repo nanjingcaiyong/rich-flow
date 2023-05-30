@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.40](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.39...v0.1.40) (2023-05-30)
+
+
+### Bug Fixes
+
+* **bin:** merge 删除远程分支逻辑 ([e40784b](https://github.com/nanjingcaiyong/rich-workflow/commit/e40784bc11e1684c490efa2e99e7efddc9fb8d55))
+
 ### [0.1.39](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.38...v0.1.39) (2023-05-18)
 
 
