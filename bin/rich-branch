@@ -62,9 +62,9 @@ let description = program.args[1];            // 分支描述
 let link = program.args[2];                   // 分支描述链接
 
 
-let descriptionWithLink = description
-if (options.description && options.link) {
-  descriptionWithLink = terminalLink(description, link)
+let descriptionWithLink = description || link;
+if (options.link) {
+  descriptionWithLink = terminalLink(descriptionWithLink, link);
 }
 
 /**
@@ -97,7 +97,7 @@ async function createBranch (branchName) {
   const answer = await askQuestions([branchType]);
   let newBranchName = `${answer.type}/${branchName}`;
   let stack = [command(`git checkout ${options.branch ? '-b' : ''} ${newBranchName}`)]
-  if (options.description) { // 如果用户执行
+  if (descriptionWithLink) { // 如果用户执行
     stack.push(setBranchDescription(newBranchName, descriptionWithLink))
   }
   return Promise.all(stack).then(() => newBranchName).catch(() => { throw newBranchName });
@@ -191,7 +191,7 @@ function getBranchesFromCommand (str) {
  */
 function searchWithDescription (keyword = '', withDescription = false) {
   return exec(`git branch | grep '${keyword}'`)
-    .then(async res => {
+    .then(async res => { 
       const branchMap = getBranchesFromCommand(res.stdout)
       const branchNames = Object.keys(branchMap)
       if (branchNames.length === 1 && withDescription) {
