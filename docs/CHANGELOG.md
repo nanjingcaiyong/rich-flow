@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.41](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.40...v0.1.41) (2023-05-30)
+
+
+### Bug Fixes
+
+* **push:** 推送逻辑修改 ([d12e6b9](https://github.com/nanjingcaiyong/rich-workflow/commit/d12e6b9263a9155b72bf9355dc33e9dd9748aec1))
+
 ### [0.1.40](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.39...v0.1.40) (2023-05-30)
 
 
