@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 const { program } = require('commander');
-const shell = require('shelljs');
 const chalk = require('chalk');
-const { isRemoteBranch, gitBranchIs } = require('../lib/utils.js')
+const { isRemoteBranch, gitBranchIs, command, oraPromise } = require('../lib/utils.js')
 
 program
   .name('rich')
@@ -17,22 +16,19 @@ program
   .on('exit', console.log)
   .parse(process.argv)
 
-const remoteName = program.args[0]
+const remoteName = program.args[0] || 'origin';
 
-function help () {
-  if (program.args.length < 1) return program.help()
+async function main() {
+  oraPromise(async () => {
+    const localName = await gitBranchIs();
+    const isRemote = await isRemoteBranch(localName);
+    let commandStr = 'git push';
+    if (!isRemote) {
+      commandStr += ` ${remoteName} -u ${localName}`
+    }
+    await command(commandStr)
+  }, { text: '推送远程'})
+  
 }
 
-help()
-
-async function run() {
-  const localName = await gitBranchIs()
-  const isRemote = await isRemoteBranch(localName) 
-  if (!isRemote && remoteName) {
-    shell.exec(`git push ${remoteName} -u ${localName}`)
-  } else {
-    shell.exec('git push')
-  }
-}
-
-run()
+main()
