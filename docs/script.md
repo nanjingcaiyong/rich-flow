@@ -1,7 +1,10 @@
-# 项目脚本
+# 项目脚本 Scripts
 
 
-## 启动项目
+> 同构化项目命令
+
+
+## 启动 Run
 
 
 ```sh
@@ -12,13 +15,13 @@ rich run dev
 
 ![初始化项目](/assets/script2.png)
 
-## 项目打包
+## 打包 Build
 ```sh
 rich run build
 ```
 
 
-## 代码校验
+## 校验 Lint
 
 ```sh
 # 校验 eslint
@@ -27,7 +30,7 @@ rich run lint:es
 rich run lint:style
 ```
 
-## 项目格式化
+## 格式化 Format
 
 ```sh
 # 使用 eslint 进行代码格式化

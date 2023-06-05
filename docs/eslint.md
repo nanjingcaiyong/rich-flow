@@ -1,6 +1,6 @@
 # 规范检查
 
-## 安装
+## install
 
 ```sh
 rich install eslint

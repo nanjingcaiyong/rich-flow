@@ -1,6 +1,6 @@
 # npm 相关操作
 
-## 版本升级
+## release
 
 ```sh
 rich release

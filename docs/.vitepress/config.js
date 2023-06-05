@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress'
 const config = defineConfig({
-  base: '/',
+  base: '/flow/',
   lang: 'zh-CN',
   title: 'rich-flow 中文文档',
   description: '致力于提升研发效率和规范的工程化解决方案',
@@ -83,9 +83,9 @@ const config = defineConfig({
       text: '编辑页面'
     },
     algolia: {
-      apiKey: 'fbac67facface4f8ccc1d1816529d20f',
-      appId: 'JMMLA5H26B',
-      indexName: 'rich-flow',
+      apiKey: '053f6f4b49dfe29342d5b8085343882e',
+      appId: 'V3NR2825R3',
+      indexName: 'caiyongio',
       algoliaOptions: {
         hitsPerPage: 10,
       },
