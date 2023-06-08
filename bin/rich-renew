@@ -51,11 +51,8 @@ function mixed (l1,l2) {
 }
 
 async function run() {
-  const localBranchList = await queryLocalBranches()
-  const remoteBranchList = await queryRemoteBranches()
-
+  const [localBranchList, remoteBranchList] = await Promise.all([queryLocalBranches(), queryRemoteBranches()])
   await service.uncommittedCode()
-
   const isMasterBranch = await gitBranchIs('master')
   if (isMasterBranch) {
     await command('git pull')
