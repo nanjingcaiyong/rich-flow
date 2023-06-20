@@ -55,7 +55,6 @@
     "handlebars": "^4.7.7",
     "inquirer": "^8.2.0",
     "metalsmith": "^2.4.2",
-    "minimist": "^1.2.5",
     "multimatch": "^2.1.0",
     "read-metadata": "^1.0.0",
     "request": "^2.88.2",
@@ -82,6 +81,7 @@
     "eslint": "^8.18.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.2",
+    "minimist": "^1.2.8",
     "vitepress": "^1.0.0-alpha.2"
   }
 }

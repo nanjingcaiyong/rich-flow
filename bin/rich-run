@@ -15,6 +15,8 @@ program
     console.log()
   })
   .option('-s', '--save')
+  .option('--env <env>')
+  .option('--module <module>')
   .on('exit', () => {
     console.log()
   })
@@ -25,6 +27,8 @@ function help() {
 }
 
 help()
+const options = program.opts()
+const optionsStr = Object.entries(options).reduce((options, [key, val]) => options += `--${key}=${val} `, ' ')
 
 const COMMAND_TYPE = program.args[0]; // 执行的command
 async function run() {
@@ -35,21 +39,19 @@ async function run() {
     const scripts = config.scripts[COMMAND_TYPE]
     let index = -1, answer = {}
     while(++index < scripts.length) {
-      if (Array.isArray(scripts[index])) {
+      const script = scripts[index]
+      if (typeof script === 'object') {
         answer[index] = (await askQuestions([{
           name: 'option',
-          type: 'list',
-          message: scripts[index][0],
-          choices: scripts[index][1],
-          default: 0
-        }])).option
+          ...script
+        }])).option 
       }
     }
   
     let shellCommand = config.scripts[COMMAND_TYPE]
       .reduce((command, keyword, index) => command += ` ${answer[index] ?? keyword}`, '')
-      console.log(shellCommand)
-      shell.exec(shellCommand)
+      console.log(shellCommand + optionsStr)
+      shell.exec(shellCommand + optionsStr)
   }
 }
 run()
