@@ -2,7 +2,7 @@
 layout: home
 
 title: rich-flow
-titleTemplate: The official js for rich
+titleTemplate: 前端工作流
 
 hero:
   name: rich-flow
@@ -17,8 +17,8 @@ hero:
       link: https://github.com/nanjingcaiyong/rich-flow
 
 features:
-  - title: 创建项目
-    details: 此模块提供初始化多种定制化项目模板(mpa、server、doc等)
+  - title: 指南
+    details: 了解设计指南，帮助产品设计人员搭建逻辑清晰、结构合理且高效易用的产品。
   - title: 同构npm脚本
     details: 此模块提供项目启动、打包、代码规范校验、格式化等
   - title: Git操作
