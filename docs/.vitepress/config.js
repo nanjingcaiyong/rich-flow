@@ -79,7 +79,7 @@ const config = defineConfig({
       }
     ],
     editLink: {
-      pattern: 'https://github.com/nanjingcaiyong/rich-flow/edit/main/docs/:path',
+      pattern: 'https://github.com/nanjingcaiyong/flow/edit/master/docs/:path',
       text: '编辑页面'
     },
     algolia: {
@@ -92,7 +92,7 @@ const config = defineConfig({
     },
     // github
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/nanjingcaiyong/rich-flow' }
+      { icon: 'github', link: 'https://github.com/nanjingcaiyong/flow' }
     ],
     footer: {
       message: 'Released under the MIT License.',
