@@ -14,7 +14,7 @@ hero:
       link: /guide
     - theme: alt
       text: 在GitHub上查看
-      link: https://github.com/nanjingcaiyong/rich-flow
+      link: https://github.com/nanjingcaiyong/flow
 
 features:
   - title: 指南
