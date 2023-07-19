@@ -23,8 +23,7 @@ jobs:
         with:
           node-version: 16
           cache: npm
-      
-      - run: echo "//npm.pkg.github.com/:_authToken=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" > .npmrc echo "@xxxxx=https://npm.pkg.github.com/" >> .npmrc
+          
       - run: npm ci
       - name: Build
         run: npm run docs:build
