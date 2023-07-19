@@ -5,7 +5,7 @@ const program = require('commander')
 const exists = require('fs').existsSync
 const path = require('path')
 const ora = require('ora')
-const home = require('user-home')
+const {homedir} = require('os');
 const tildify = require('tildify')
 const chalk = require('chalk')
 const rm = require('rimraf').sync
@@ -57,7 +57,7 @@ async function main () {
   const name = inPlace ? path.relative('../', process.cwd()) : projectName;   // 如果输入的项目名为"空"或为"."则不生成新的文件夹，在当前目录下载项目
   const to = path.resolve(projectName || '.');                                // 下载路径
   const clone = options.clone || false;
-  const tmp = path.join(home, '.rich-templates', template.replace(/[/:]/g, '-'))
+  const tmp = path.join(homedir(), '.rich-templates', template.replace(/[/:]/g, '-'))
   /**
    * 从远程模板库下载一个模板
    * @param {String} template

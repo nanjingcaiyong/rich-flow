@@ -22,12 +22,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: Install pnpm
-        run: npm i pnpm -g
-
-      - name: Install Dependencies
-        # if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
-        run: pnpm i # 安装依赖
+          cache: npm
+      - run: npm ci
       - name: Build
         run: npm run docs:build
       - uses: actions/configure-pages@v2

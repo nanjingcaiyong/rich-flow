@@ -63,7 +63,6 @@
     "spdx-license-list": "^6.6.0",
     "terminal-link": "^3.0.0",
     "tildify": "^2.0.0",
-    "user-home": "^3.0.0",
     "validate-npm-package-name": "^3.0.0"
   },
   "engines": {
@@ -78,7 +77,6 @@
     "@commitlint/config-conventional": "^17.0.2",
     "commitizen": "^4.2.4",
     "commitlint": "^17.0.2",
-    "crypto": "^1.0.1",
     "eslint": "^8.18.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.2",
