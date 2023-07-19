@@ -2,4 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 PATH="/usr/local/bin:$PATH"
-bash deploy.sh
+# bash deploy.sh
