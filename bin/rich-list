@@ -17,7 +17,7 @@ program
   .parse(process.argv)
 
 const GITHUB = {
-  url: 'https://api.github.com/users/nanjingcaiyong/repos',
+  url: 'https://api.github.com/users/rich-group/repos',
   agent: 'rich-flow',
   topic: 'templates' // 需要给项目topics添加'templates'
 }
