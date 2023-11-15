@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const { program } = require('commander')
-const logger = require('../lib/logger')
-const request = require('request')
+const { queryTemplates } = require('../lib/service')
+const { oraPromise } = require('../lib/utils')
 const chalk = require('chalk')
 
 program
@@ -16,31 +16,22 @@ program
   })
   .parse(process.argv)
 
-const GITHUB = {
-  url: 'https://api.github.com/users/rich-group/repos',
-  agent: 'rich-flow',
-  topic: 'templates' // 需要给项目topics添加'templates'
-}
+
+console.log('test')
 
 console.log()
 process.on('exit', () => {
   console.log()
 })
 
-request({
-  url: GITHUB.url,
-  headers: {
-    'User-Agent': GITHUB.agent
-  }
-}, (err, res, body) => {
-  if (err) logger.fatal(err)
-  const requestBody = JSON.parse(body)
-    .filter(t => t.topics.includes(GITHUB.topic))
-  if (Array.isArray(requestBody)) {
+async function main () {
+  const templates = await oraPromise(queryTemplates, {text: '获取项目模板'})
+
+  if (Array.isArray(templates)) {
     console.log('  下面是可用的项目模板： ')
     console.log()
-    requestBody.length
-      ? requestBody.forEach(repo => {
+    templates.length
+      ? templates.forEach(repo => {
         console.log(
           '  ' + chalk.yellow('★') +
           '  ' + chalk.blue(repo.name) +
@@ -48,6 +39,8 @@ request({
       })
       : console.log( '  ' + chalk.red('none'))
   } else {
-    console.error(requestBody.message)
+    console.error(templates.message)
   }
-})
+}
+
+main()
