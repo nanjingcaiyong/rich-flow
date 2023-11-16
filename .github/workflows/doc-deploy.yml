@@ -32,11 +32,14 @@ jobs:
       - name: Build
         run: npm run docs:build
 
-      - name: Deploy to GitHub Pages
-        # 此actions的官方文档 https://github.com/JamesIves/github-pages-deploy-action
-        uses: JamesIves/github-pages-deploy-action@v4
+ 
+     - name: Deploy to GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v2
+        # 环境变量
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTION_SECRET }}
         with:
-          # 要部署的文件夹，必填
-          FOLDER: docs/.vitepress/dist
-          # 希望部署的分支，默认gh-pages
-          BRANCH: gh-pages
+          # 部署到 gh-pages 分支
+          target_branch: gh-pages
+          # 部署目录为 VuePress 的默认输出目录
+          build_dir: docs/.vuepress/dist
