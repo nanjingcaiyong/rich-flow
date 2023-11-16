@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress'
 const config = defineConfig({
-  base: '/flow/',
+  base: '/rich-flow/',
   lang: 'zh-CN',
   title: 'rich-flow 中文文档',
   description: '致力于提升研发效率和规范的工程化解决方案',
@@ -92,7 +92,7 @@ const config = defineConfig({
     },
     // github
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/nanjingcaiyong/flow' }
+      { icon: 'github', link: 'https://github.com/rich-group/rich-flow' }
     ],
     footer: {
       message: 'Released under the MIT License.',

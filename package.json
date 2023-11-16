@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nanjingcaiyong/rich-workflow"
+    "url": "https://github.com/rich-group/rich-flow"
   },
   "keywords": [
     "cli",
@@ -44,7 +44,7 @@
     "name": "yong.cai",
     "email": "yong.cai@kapeixi.com"
   },
-  "homepage": "https://nanjingcaiyong.github.io/flow/",
+  "homepage": "https://rich-group.github.io/rich-flow/",
   "license": "ISC",
   "dependencies": {
     "async": "^3.2.3",
