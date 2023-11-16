@@ -54,7 +54,7 @@ jobs:
 
       # 运行构建脚本
       - name: Run Build Script
-        run: npm run build
+        run: npm run docs:build
 
       # 部署到 GitHub Pages
       - name: Deploy to GitHub Pages
