@@ -26,16 +26,14 @@ jobs:
         run: npm i pnpm -g
 
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
+        # if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
         run: pnpm i # 安装依赖
-
       - name: Build
         run: npm run docs:build
-
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
+      - uses: actions/configure-pages@v2
+      - uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.ACCESS_TOKEN }}
-          publish_dir: ./docs/.vitepress/dist
+          path: docs/.vitepress/dist
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v1
