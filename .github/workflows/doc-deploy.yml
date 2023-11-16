@@ -26,7 +26,7 @@ jobs:
         run: npm i pnpm -g
 
       - name: Install Dependencies
-        # if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
+        if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
         run: pnpm i # 安装依赖
 
       - name: Build
