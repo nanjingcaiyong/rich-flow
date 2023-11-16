@@ -1,39 +1,38 @@
-name: Deploy
+name: GitHub Pages
+
 on:
-  workflow_dispatch: {}
   push:
     branches:
-      - master
+      - master  # Set a branch name to trigger deployment
+  pull_request:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: Install pnpm
-        run: npm i pnpm -g
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
-        run: pnpm i # 安装依赖
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.110.0'
 
       - name: Build
-        run: npm run docs:build
+        run: hugo --minify
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
+        # If you're changing the branch from main,
+        # also change the `main` in `refs/heads/main`
+        # below accordingly.
+        if: github.ref == 'refs/heads/master'
         with:
-          github_token: ${{ secrets.ACCESS_TOKEN }}
-          publish_dir: ./docs/.vitepress/dist
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
