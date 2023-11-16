@@ -46,15 +46,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-cache-
 
-      # 安装依赖 npm
-      - name: Install dependencies
-        # 如果没有命中缓存才执行 npm install
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: npm install
+      - name: Install pnpm
+        run: npm i pnpm -g
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true' # 如果没有缓存的话
+        run: pnpm i # 安装依赖
 
       # 运行构建脚本
       - name: Run Build Script
-        run: npm run docs:build
+        run: pnpm run docs:build
 
       # 部署到 GitHub Pages
       - name: Deploy to GitHub Pages
