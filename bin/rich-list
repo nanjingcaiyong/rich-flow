@@ -16,9 +16,6 @@ program
   })
   .parse(process.argv)
 
-
-console.log('test')
-
 console.log()
 process.on('exit', () => {
   console.log()
