@@ -1,20 +1,24 @@
-name: Deploy to GitHub Pages
-
+name: Deploy
 on:
+  workflow_dispatch: {}
   push:
     branches:
-      - master # Change this to your main branch
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v3
         with:
-          lfs: true
           fetch-depth: 0
-          token: ${{ secrets.ACCESS_TOKEN }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -27,6 +31,7 @@ jobs:
 
       - name: Build
         run: npm run docs:build
+
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
