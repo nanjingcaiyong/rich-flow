@@ -38,4 +38,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v1
         with:
-          token: ${{ github.token }}
+          token: ${{ github.token1 }}
