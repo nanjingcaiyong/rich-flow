@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/rich-group/rich-flow/compare/v0.2.0...v0.2.1) (2023-11-17)
+
+
+### Features
+
+* 1 ([68bdd3e](https://github.com/rich-group/rich-flow/commit/68bdd3e00580c187833b63b8181ae54495ac7315))
+* 1 ([d7daad9](https://github.com/rich-group/rich-flow/commit/d7daad99c4cec0bbb71ed9c092dc24d2d48d2d17))
+* 1 ([358618f](https://github.com/rich-group/rich-flow/commit/358618fff239765f6d5550138233e6c510cf4326))
+* 1 ([35fba42](https://github.com/rich-group/rich-flow/commit/35fba428facc295c328ce4a15d99cfa0b669b967))
+* 1 ([8e87e33](https://github.com/rich-group/rich-flow/commit/8e87e338666d4249dff5768bb42d894ac2a71ec1))
+* 1 ([0802658](https://github.com/rich-group/rich-flow/commit/08026583e749e58c290fe547ba65a582b35b7218))
+* 2 ([2eb4c16](https://github.com/rich-group/rich-flow/commit/2eb4c16f1a4414457d83bd71db08e3957c6d74d7))
+* 2 ([fc98403](https://github.com/rich-group/rich-flow/commit/fc98403a8e0d300aab78eac61f62c252cbe7e142))
+* 2 ([64f8b5f](https://github.com/rich-group/rich-flow/commit/64f8b5fe3761144fbff1db58bc5783a29d408406))
+* 2 ([e938b0f](https://github.com/rich-group/rich-flow/commit/e938b0f2063515a626e7ed6af29b80d131208804))
+* 3 ([d6787d5](https://github.com/rich-group/rich-flow/commit/d6787d55ec0982e2fea1b0072a3835173e6c809d))
+* 3 ([6c1a398](https://github.com/rich-group/rich-flow/commit/6c1a3985c8d761875f65acb862cd0506fcf719e6))
+* 4 ([06c0cb4](https://github.com/rich-group/rich-flow/commit/06c0cb47a8a079faa15e43f5a07f514fe0539cba))
+* 5 ([9755255](https://github.com/rich-group/rich-flow/commit/97552552bf1a3af96006650db6231ec8a8597bba))
+* 6 ([bdeb83d](https://github.com/rich-group/rich-flow/commit/bdeb83d6ee7e9552b55af2bf97795db82c1cc408))
+* 7 ([9ade723](https://github.com/rich-group/rich-flow/commit/9ade723c25d4f4cecaf6bff16e84c4284d4e5405))
+* 8 ([16253e8](https://github.com/rich-group/rich-flow/commit/16253e8a4ab46499026e9881a04f730776144b51))
+* 9 ([db22183](https://github.com/rich-group/rich-flow/commit/db22183d63a7bdd4fd13f9ec0f87f4b17c74de31))
+* 修改配置 ([2075a8a](https://github.com/rich-group/rich-flow/commit/2075a8a131a67e9ea6a78f78c8f074f11f71b53d))
+* 修改配置 ([76db7e6](https://github.com/rich-group/rich-flow/commit/76db7e6343fac76179c0585d57b3490d0c3137e5))
+* 修改配置 ([2daaa92](https://github.com/rich-group/rich-flow/commit/2daaa923404033719bbf58f5fa03009b004a00e0))
+* 修改配置 ([de490bc](https://github.com/rich-group/rich-flow/commit/de490bc5884aadceda91e693218291190beaaa33))
+* 修改配置 ([abea41c](https://github.com/rich-group/rich-flow/commit/abea41c90d8af11e480e6c0e6757c18b21ad4aa4))
+* 修改配置 ([82656ff](https://github.com/rich-group/rich-flow/commit/82656ff71c516be0e047c16a8d18f71ba0ebd176))
+* 修改配置 ([6700cc6](https://github.com/rich-group/rich-flow/commit/6700cc67029ead013ede784aec9297694283af3e))
+* 修改配置 ([44aaf23](https://github.com/rich-group/rich-flow/commit/44aaf230ad3efb24343fed3bb79e998d62d27550))
+* 修改配置 ([cb4167a](https://github.com/rich-group/rich-flow/commit/cb4167aa86f04f481b2e36ade989b95730e44a22))
+* 修改配置 ([54bdc99](https://github.com/rich-group/rich-flow/commit/54bdc99744ea07907be7dbd709e6eaca39cacd97))
+
+
+### Bug Fixes
+
+* 修改模版下载地址 ([16cd6a5](https://github.com/rich-group/rich-flow/commit/16cd6a5538929c3421cc45ca6c736c55c794d2e2))
+
 ### [0.1.45](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.44...v0.1.45) (2023-06-28)
 
 ### [0.1.43](https://github.com/nanjingcaiyong/rich-workflow/compare/v0.1.42...v0.1.43) (2023-06-08)
