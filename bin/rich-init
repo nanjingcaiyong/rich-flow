@@ -79,7 +79,7 @@ async function main () {
   }
 
   function excute () {
-    const officialTemplate = 'nanjingcaiyong/' + template
+    const officialTemplate = 'rich-group/' + template
     // 判断模版是否是本地路径
     if (isLocalPath(template)) {
       const templatePath = getTemplatePath(template)
